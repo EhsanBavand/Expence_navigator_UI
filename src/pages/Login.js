@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { login } from "../services/api";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom"; // <-- Added Link
 
 function Login() {
   const [form, setForm] = useState({ username: "", password: "" });
@@ -15,8 +15,8 @@ function Login() {
     e.preventDefault();
     try {
       const res = await login(form);
-      localStorage.setItem("token", res.data.token); // Save JWT
-      navigate("/dashboard"); // Redirect after login
+      localStorage.setItem("token", res.data.token);
+      navigate("/dashboard");
     } catch (err) {
       const message = err.response?.data?.message || "Login failed";
       setError(message);
@@ -51,6 +51,11 @@ function Login() {
         {error && <div className="text-danger mt-2">{error}</div>}
         <button className="btn btn-primary mt-3">Login</button>
       </form>
+
+      {/* Register link */}
+      <p className="mt-3">
+        Don't have an account? <Link to="/register">Register here</Link>
+      </p>
     </div>
   );
 }
