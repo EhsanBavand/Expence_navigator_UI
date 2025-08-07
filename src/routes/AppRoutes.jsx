@@ -5,11 +5,6 @@ import LoginPage from "../pages/Login";
 import RegisterPage from "../pages/Register";
 import DashboardPage from "../pages/DashboardPage";
 
-import ViewIncome from "../pages/Income/ViewIncome";
-import AddIncome from "../pages/Income/AddIncome";
-import DuplicateIncome from "../pages/Income/DuplicateIncome";
-import DeleteAllIncome from "../pages/Income/DeleteAllIncome";
-
 const AppRoutes = () => {
   return (
     <Routes>
