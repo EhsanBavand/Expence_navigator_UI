@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { login } from "../services/api";
-import { useNavigate, Link } from "react-router-dom"; // <-- Added Link
+import { useNavigate, Link } from "react-router-dom";
 
 function Login() {
   const [form, setForm] = useState({ username: "", password: "" });
@@ -8,7 +8,7 @@ function Login() {
   const navigate = useNavigate();
 
   const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
+    setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
   };
 
   const handleSubmit = async (e) => {
@@ -18,42 +18,53 @@ function Login() {
       localStorage.setItem("token", res.data.token);
       navigate("/dashboard");
     } catch (err) {
-      const message = err.response?.data?.message || "Login failed";
-      setError(message);
+      setError(err.response?.data?.message || "Login failed");
     }
   };
 
   return (
-    <div className="container mt-5">
-      <h2>Login</h2>
-      <form onSubmit={handleSubmit}>
-        <div className="form-group">
-          <label>Username</label>
+    <div className="container mt-5" style={{ maxWidth: "400px" }}>
+      <h2 className="mb-4 text-center">Login</h2>
+      <form onSubmit={handleSubmit} noValidate>
+        <div className="mb-3">
+          <label htmlFor="username" className="form-label">
+            Username
+          </label>
           <input
+            id="username"
             name="username"
             value={form.username}
             onChange={handleChange}
             className="form-control"
             required
+            autoComplete="username"
           />
         </div>
-        <div className="form-group">
-          <label>Password</label>
+
+        <div className="mb-3">
+          <label htmlFor="password" className="form-label">
+            Password
+          </label>
           <input
+            id="password"
             name="password"
             type="password"
             value={form.password}
             onChange={handleChange}
             className="form-control"
             required
+            autoComplete="current-password"
           />
         </div>
-        {error && <div className="text-danger mt-2">{error}</div>}
-        <button className="btn btn-primary mt-3">Login</button>
+
+        {error && <div className="text-danger mb-3">{error}</div>}
+
+        <button type="submit" className="btn btn-primary w-100">
+          Login
+        </button>
       </form>
 
-      {/* Register link */}
-      <p className="mt-3">
+      <p className="mt-3 text-center">
         Don't have an account? <Link to="/register">Register here</Link>
       </p>
     </div>

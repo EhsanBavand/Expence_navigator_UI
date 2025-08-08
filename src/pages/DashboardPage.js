@@ -1,5 +1,4 @@
 import React from "react";
-import TitleBar from "../components/TitleBar";
 import Sidebar from "../components/Sidebar";
 
 const DashboardPage = () => {
@@ -9,14 +8,17 @@ const DashboardPage = () => {
   };
 
   return (
-    <div>
-      <TitleBar onLogout={handleLogout} />
-      <div className="d-flex">
-        <Sidebar />
-        <div className="flex-grow-1 p-4">
-          <h2>📊 Welcome to your Dashboard</h2>
-          <p>Summary of your financial activity will be displayed here.</p>
-        </div>
+    <div className="d-flex">
+      {/* Sidebar is usually handled in Layout too, so you might remove Sidebar here as well */}
+      <div className="flex-grow-1 p-4">
+        <h2>📊 Welcome to your Dashboard</h2>
+        <ul>
+          <li>We have to show all incomes since the day we...</li>
+          <li>All expenses</li>
+          <li>Chart</li>
+          <li>Monthly cost as table</li>
+          {/* etc */}
+        </ul>
       </div>
     </div>
   );

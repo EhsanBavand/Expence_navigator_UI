@@ -1,11 +1,18 @@
 import React from "react";
-import 'bootstrap/dist/css/bootstrap.min.css';
-import 'bootstrap/dist/js/bootstrap.bundle.min.js';
 
-const TitleBar = ({ onLogout }) => {
+const TitleBar = ({ onLogout, onToggleSidebar }) => {
   return (
     <nav className="navbar navbar-expand-lg navbar-dark bg-dark px-4 shadow-sm">
+      <button
+        className="btn btn-outline-light d-lg-none me-3"
+        onClick={onToggleSidebar}
+        aria-label="Toggle sidebar"
+      >
+        <i className="bi bi-list"></i>
+      </button>
+
       <span className="navbar-brand">Expense Navigator</span>
+
       <div className="ms-auto">
         <div className="dropdown">
           <button
@@ -16,9 +23,16 @@ const TitleBar = ({ onLogout }) => {
           >
             <i className="bi bi-person-circle me-1"></i> Account
           </button>
+
           <ul className="dropdown-menu dropdown-menu-end">
             <li>
-              <button className="dropdown-item" onClick={onLogout}>
+              <button
+                className="dropdown-item"
+                onClick={() => {
+                  console.log("Logout clicked"); // Debug log
+                  if (onLogout) onLogout();
+                }}
+              >
                 <i className="bi bi-box-arrow-right me-2"></i> Logout
               </button>
             </li>
