@@ -15,7 +15,10 @@ function Login() {
     e.preventDefault();
     try {
       const res = await login(form);
+
       localStorage.setItem("token", res.data.token);
+      localStorage.setItem("userId", res.data.userId); // <-- Add this line
+
       navigate("/dashboard");
     } catch (err) {
       setError(err.response?.data?.message || "Login failed");

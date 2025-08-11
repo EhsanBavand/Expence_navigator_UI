@@ -3,8 +3,16 @@ import axios from "axios";
 const API_BASE_URL = "http://localhost:5283/api";
 
 // Auth
+// export const login = async (credentials) => {
+
+//   return await axios.post(`${API_BASE_URL}/auth/login`, credentials);
+// };
 export const login = async (credentials) => {
-  return await axios.post(`${API_BASE_URL}/auth/login`, credentials);
+  console.log("Calling login API:", `${API_BASE_URL}/auth/login`);
+  console.log("Credentials:", credentials);
+  const response = await axios.post(`${API_BASE_URL}/auth/login`, credentials);
+  console.log("Login response:", response);
+  return response;
 };
 
 export const register = async (userInfo) => {
@@ -16,8 +24,21 @@ export const getIncomes = async (userId) => {
   return await axios.get(`${API_BASE_URL}/income/user/${userId}`);
 };
 
-export const getIncomesByMonth = async (userId, month, year) => {
-  return await axios.get(`${API_BASE_URL}/income/by-month`, {
+// export const getIncomesByMonth = async (userId, month, year) => {
+//   const url = `${API_BASE_URL}/income/by-month`;
+//   const params = { userId, month, year };
+
+//   console.log("Calling getIncomesByMonth API:", url);
+//   console.log("Query params:", params);
+
+//   const response = await axios.get(url, { params });
+
+//   console.log("getIncomesByMonth response:", response);
+//   return response;
+// };
+
+export const getIncomesByMonth = (userId, month, year) => {
+  return axios.get(`${API_BASE_URL}/income/by-month`, {
     params: { userId, month, year },
   });
 };

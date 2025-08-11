@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Modal, Button, Form, Spinner, Alert } from "react-bootstrap";
-import Layout from "../components/Layout"; // Import your Layout component
+import { jwtDecode } from "jwt-decode"; // Correct import, jwtDecode is a named export
 import {
   getIncomesByMonth,
   addIncome,
@@ -24,37 +24,60 @@ const IncomePage = () => {
     isEstimated: false,
     description: "",
   });
+  const [userId, setUserId] = useState(null);
 
-  // Replace with your actual user ID from auth
-  const userId = "user-123";
-
+  // On mount, check auth
   useEffect(() => {
-    fetchIncomes();
+    const token = localStorage.getItem("token");
+    const storedUserId = localStorage.getItem("userId");
+    console.log("Token from localStorage:", token);
+    console.log("UserId from localStorage:", storedUserId);
+
+    if (!token || !storedUserId) {
+      setError("User is not authenticated");
+      return;
+    }
+
+    try {
+      const decoded = jwtDecode(token);
+      console.log("Decoded JWT:", decoded);
+      setUserId(storedUserId);
+      setError(null);
+    } catch (ex) {
+      setError("Invalid token");
+    }
   }, []);
 
-  const fetchIncomes = async () => {
-    setLoading(true);
-    try {
-      const now = new Date();
-      const response = await getIncomesByMonth(
-        userId,
-        now.getMonth() + 1,
-        now.getFullYear()
-      );
-      setIncomeList(response.data);
-      setError(null);
-    } catch (e) {
-      setError("Failed to load incomes.");
-    } finally {
-      setLoading(false);
-    }
-  };
+  // Fetch incomes when userId is set
+  useEffect(() => {
+    if (!userId) return;
+
+    const fetchIncomes = async () => {
+      setLoading(true);
+      try {
+        const now = new Date();
+        const response = await getIncomesByMonth(
+          userId,
+          now.getMonth() + 1,
+          now.getFullYear()
+        );
+        setIncomeList(response.data);
+        setError(null);
+      } catch (e) {
+        setError("Failed to load incomes.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchIncomes();
+  }, [userId]);
 
   const handleShowAddModal = () => {
     setEditingIncome(null);
     setFormData({
       sourceType: "",
-      owner: "",
+      owner: userId || "",
       amount: "",
       date: "",
       isRecurring: false,
@@ -90,13 +113,13 @@ const IncomePage = () => {
     e.preventDefault();
 
     const incomePayload = {
-      ...formData,
+      sourceType: formData.sourceType,
+      owner: formData.owner,
       amount: parseFloat(formData.amount),
-      date: new Date(formData.date),
-      userId,
-      month: new Date(formData.date).getMonth() + 1,
-      year: new Date(formData.date).getFullYear(),
-      createdBy: userId,
+      date: formData.date,
+      isRecurring: formData.isRecurring,
+      isEstimated: formData.isEstimated,
+      description: formData.description || "",
     };
 
     try {
@@ -106,8 +129,15 @@ const IncomePage = () => {
         await addIncome(incomePayload);
       }
       setShowModal(false);
-      fetchIncomes();
-    } catch {
+      // Refresh incomes
+      const now = new Date();
+      const response = await getIncomesByMonth(
+        userId,
+        now.getMonth() + 1,
+        now.getFullYear()
+      );
+      setIncomeList(response.data);
+    } catch (err) {
       setError("Failed to save income.");
     }
   };
@@ -117,7 +147,14 @@ const IncomePage = () => {
 
     try {
       await deleteIncome(id);
-      fetchIncomes();
+      // Refresh incomes
+      const now = new Date();
+      const response = await getIncomesByMonth(
+        userId,
+        now.getMonth() + 1,
+        now.getFullYear()
+      );
+      setIncomeList(response.data);
     } catch {
       setError("Failed to delete income.");
     }
@@ -126,7 +163,14 @@ const IncomePage = () => {
   const handleDuplicateNextMonth = async (id) => {
     try {
       await duplicateIncomeNextMonth(id);
-      fetchIncomes(); // reload current month incomes
+      // Refresh incomes
+      const now = new Date();
+      const response = await getIncomesByMonth(
+        userId,
+        now.getMonth() + 1,
+        now.getFullYear()
+      );
+      setIncomeList(response.data);
     } catch {
       setError("Failed to duplicate income.");
     }
@@ -134,22 +178,36 @@ const IncomePage = () => {
 
   const handleLogout = () => {
     localStorage.removeItem("token");
+    localStorage.removeItem("userId");
     window.location.href = "/login";
   };
+
+  if (error) {
+    return (
+      <div
+        className="container mt-4"
+        style={{ maxWidth: "900px", margin: "auto" }}
+      >
+        <Alert variant="danger">{error}</Alert>
+        <Button onClick={handleLogout}>Go to Login</Button>
+      </div>
+    );
+  }
 
   return (
     <div
       className="container mt-4"
-      style={{ maxWidth: "900px", margin: "auto" }} // limit width and center
+      style={{ maxWidth: "900px", margin: "auto" }}
     >
       <div className="d-flex justify-content-between align-items-center mb-3">
         <h4>Income Overview</h4>
         <Button onClick={handleShowAddModal}>
           <i className="bi bi-plus-circle me-2"></i> New Income
         </Button>
+        <Button variant="outline-secondary" onClick={handleLogout}>
+          Logout
+        </Button>
       </div>
-
-      {error && <Alert variant="danger">{error}</Alert>}
 
       {loading ? (
         <Spinner animation="border" />
@@ -169,51 +227,50 @@ const IncomePage = () => {
               </tr>
             </thead>
             <tbody>
-              {incomeList.length === 0 && (
+              {incomeList.length === 0 ? (
                 <tr>
                   <td colSpan="8" className="text-center">
                     No incomes found
                   </td>
                 </tr>
+              ) : (
+                incomeList.map((income) => (
+                  <tr key={income.id}>
+                    <td>{new Date(income.date).toLocaleDateString()}</td>
+                    <td>{income.owner}</td>
+                    <td>{income.sourceType}</td>
+                    <td>${income.amount.toFixed(2)}</td>
+                    <td>{income.isRecurring ? "Yes" : "No"}</td>
+                    <td>{income.isEstimated ? "Yes" : "No"}</td>
+                    <td>{income.description}</td>
+                    <td>
+                      <Button
+                        variant="outline-primary"
+                        size="sm"
+                        className="me-2"
+                        onClick={() => handleShowEditModal(income)}
+                      >
+                        <i className="bi bi-pencil-square"></i>
+                      </Button>
+                      <Button
+                        variant="outline-success"
+                        size="sm"
+                        className="me-2"
+                        onClick={() => handleDuplicateNextMonth(income.id)}
+                      >
+                        <i className="bi bi-calendar-plus"></i>
+                      </Button>
+                      <Button
+                        variant="outline-danger"
+                        size="sm"
+                        onClick={() => handleDeleteIncome(income.id)}
+                      >
+                        <i className="bi bi-trash3"></i>
+                      </Button>
+                    </td>
+                  </tr>
+                ))
               )}
-              {incomeList.map((income) => (
-                <tr key={income.id}>
-                  <td>{new Date(income.date).toLocaleDateString()}</td>
-                  <td>{income.owner}</td>
-                  <td>{income.sourceType}</td>
-                  <td>${income.amount.toFixed(2)}</td>
-                  <td>{income.isRecurring ? "Yes" : "No"}</td>
-                  <td>{income.isEstimated ? "Yes" : "No"}</td>
-                  <td>{income.description}</td>
-                  <td>
-                    <Button
-                      variant="outline-primary"
-                      size="sm"
-                      className="me-2"
-                      onClick={() => handleShowEditModal(income)}
-                    >
-                      <i className="bi bi-pencil-square"></i>
-                    </Button>
-
-                    <Button
-                      variant="outline-success"
-                      size="sm"
-                      className="me-2"
-                      onClick={() => handleDuplicateNextMonth(income.id)}
-                    >
-                      <i className="bi bi-calendar-plus"></i>
-                    </Button>
-
-                    <Button
-                      variant="outline-danger"
-                      size="sm"
-                      onClick={() => handleDeleteIncome(income.id)}
-                    >
-                      <i className="bi bi-trash3"></i>
-                    </Button>
-                  </td>
-                </tr>
-              ))}
             </tbody>
           </table>
         </div>
@@ -234,6 +291,7 @@ const IncomePage = () => {
                 value={formData.owner}
                 onChange={handleFormChange}
                 required
+                readOnly
               />
             </Form.Group>
 
