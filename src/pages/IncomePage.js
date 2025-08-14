@@ -1,12 +1,17 @@
 import React, { useEffect, useState } from "react";
 import { Modal, Button, Form, Spinner, Alert } from "react-bootstrap";
-import { jwtDecode } from "jwt-decode"; // Correct import, jwtDecode is a named export
+import { jwtDecode } from "jwt-decode";
+
 import {
   getIncomesByMonth,
   addIncome,
   updateIncome,
   deleteIncome,
-  duplicateIncomeNextMonth,
+  duplicateIncome,
+  addSource,
+  getSources,
+  updateSource,
+  deleteSource,
 } from "../services/api";
 
 const IncomePage = () => {
@@ -22,33 +27,51 @@ const IncomePage = () => {
     date: "",
     isRecurring: false,
     isEstimated: false,
+    frequency: "None",
     description: "",
   });
-  const [userId, setUserId] = useState(null);
+  // State for Source modal
+  const [showSourceModal, setShowSourceModal] = useState(false);
+  const [sourceFormData, setSourceFormData] = useState({
+    sourceType: "",
+    description: "",
+  });
+  const [sourceList, setSourceList] = useState([]);
+  const [loadingSources, setLoadingSources] = useState(false);
 
-  // On mount, check auth
+  const [userId, setUserId] = useState(null);
+  const [sources, setSources] = useState([]);
+
+  // Decode JWT and set userId
   useEffect(() => {
     const token = localStorage.getItem("token");
-    const storedUserId = localStorage.getItem("userId");
-    console.log("Token from localStorage:", token);
-    console.log("UserId from localStorage:", storedUserId);
-
-    if (!token || !storedUserId) {
+    if (!token) {
       setError("User is not authenticated");
       return;
     }
 
     try {
       const decoded = jwtDecode(token);
-      console.log("Decoded JWT:", decoded);
-      setUserId(storedUserId);
-      setError(null);
-    } catch (ex) {
+
+      // Try nameidentifier first, then sub
+      const id =
+        decoded[
+          "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier"
+        ] ||
+        decoded.sub ||
+        null;
+
+      if (!id) setError("User is not authenticated");
+      else {
+        setUserId(id); // now this will be your GUID
+        setError(null);
+      }
+    } catch {
       setError("Invalid token");
     }
   }, []);
 
-  // Fetch incomes when userId is set
+  // Fetch incomes
   useEffect(() => {
     if (!userId) return;
 
@@ -73,15 +96,43 @@ const IncomePage = () => {
     fetchIncomes();
   }, [userId]);
 
+  // UseEffect For  Source Type
+  useEffect(() => {
+    if (!userId) return;
+
+    const fetchSources = async () => {
+      setLoadingSources(true);
+      try {
+        const response = await getSources(userId); // adjusted to match backend
+        setSourceList(response.data);
+      } catch (err) {
+        console.error("Failed to load sources:", err);
+      } finally {
+        setLoadingSources(false);
+      }
+    };
+
+    fetchSources();
+  }, [userId]);
+
+  const handleFormChange = (e) => {
+    const { name, value, type, checked } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: type === "checkbox" ? checked : value,
+    }));
+  };
+
   const handleShowAddModal = () => {
     setEditingIncome(null);
     setFormData({
       sourceType: "",
-      owner: userId || "",
+      owner: "",
       amount: "",
       date: "",
       isRecurring: false,
       isEstimated: false,
+      frequency: "None",
       description: "",
     });
     setShowModal(true);
@@ -96,30 +147,37 @@ const IncomePage = () => {
       date: income.date.split("T")[0],
       isRecurring: income.isRecurring,
       isEstimated: income.isEstimated,
+      frequency: income.frequency || "None",
       description: income.description || "",
     });
     setShowModal(true);
   };
 
-  const handleFormChange = (e) => {
-    const { name, value, type, checked } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: type === "checkbox" ? checked : value,
-    }));
-  };
-
   const handleSaveIncome = async (e) => {
     e.preventDefault();
+    if (!userId) {
+      setError("User is not authenticated");
+      setShowModal(false);
+      return;
+    }
+
+    const now = new Date(formData.date);
 
     const incomePayload = {
+      userId: userId,
+      owner: formData.owner || userId,
       sourceType: formData.sourceType,
-      owner: formData.owner,
       amount: parseFloat(formData.amount),
       date: formData.date,
-      isRecurring: formData.isRecurring,
+      month: now.getMonth() + 1,
+      year: now.getFullYear(),
+      isRecurring: formData.frequency !== "None",
       isEstimated: formData.isEstimated,
+      frequency: formData.frequency, // send string directly
       description: formData.description || "",
+      createdBy: userId,
+      createdDate: new Date().toISOString(),
+      modifiedDate: new Date().toISOString(),
     };
 
     try {
@@ -128,26 +186,25 @@ const IncomePage = () => {
       } else {
         await addIncome(incomePayload);
       }
-      setShowModal(false);
-      // Refresh incomes
-      const now = new Date();
-      const response = await getIncomesByMonth(
+
+      const refresh = await getIncomesByMonth(
         userId,
         now.getMonth() + 1,
         now.getFullYear()
       );
-      setIncomeList(response.data);
+      setIncomeList(refresh.data);
+      setError(null);
     } catch (err) {
+      console.error(err);
       setError("Failed to save income.");
+    } finally {
+      setShowModal(false);
     }
   };
 
   const handleDeleteIncome = async (id) => {
-    if (!window.confirm("Are you sure you want to delete this income?")) return;
-
     try {
       await deleteIncome(id);
-      // Refresh incomes
       const now = new Date();
       const response = await getIncomesByMonth(
         userId,
@@ -160,10 +217,9 @@ const IncomePage = () => {
     }
   };
 
-  const handleDuplicateNextMonth = async (id) => {
+  const handleDuplicateIncome = async (id) => {
     try {
-      await duplicateIncomeNextMonth(id);
-      // Refresh incomes
+      await duplicateIncome(id);
       const now = new Date();
       const response = await getIncomesByMonth(
         userId,
@@ -178,21 +234,76 @@ const IncomePage = () => {
 
   const handleLogout = () => {
     localStorage.removeItem("token");
-    localStorage.removeItem("userId");
     window.location.href = "/login";
   };
 
-  if (error) {
-    return (
-      <div
-        className="container mt-4"
-        style={{ maxWidth: "900px", margin: "auto" }}
-      >
-        <Alert variant="danger">{error}</Alert>
-        <Button onClick={handleLogout}>Go to Login</Button>
-      </div>
-    );
-  }
+  // Handler to open the Source modal
+  const handleShowAddSourceModal = () => {
+    setSourceFormData({
+      sourceType: "",
+      description: "",
+    });
+    setShowSourceModal(true);
+  };
+  // Save Source Type
+  const handleSaveSource = async () => {
+    if (!userId) return setError("User is not authenticated");
+
+    const now = new Date().toISOString();
+
+    const payload = {
+      Name: sourceFormData.sourceType,
+      Description: sourceFormData.description,
+      UserId: userId,
+      CreatedDate: now,
+      ModifiedDate: now,
+    };
+
+    try {
+      if (sourceFormData.id) {
+        await updateSource(sourceFormData.id, payload); // create API call
+      } else {
+        await addSource(payload);
+      }
+
+      const response = await getSources(userId);
+      setSourceList(response.data);
+
+      setShowSourceModal(false);
+      setSourceFormData({ sourceType: "", description: "" });
+      setError(null);
+    } catch (err) {
+      console.error("Failed to save source:", err);
+      setError("Failed to save source.");
+    }
+  };
+
+  // Edit source
+  const handleEditSource = async (source) => {
+    const updatedData = { ...source, name: "New Name" }; // example update
+    try {
+      const updated = await updateSource(source.id, updatedData);
+      // update local state
+      setSources((prev) =>
+        prev.map((s) => (s.id === updated.id ? updated : s))
+      );
+    } catch (error) {
+      console.error("Update failed:", error);
+    }
+  };
+
+  // Delete source
+  const handleDeleteSource = async (id) => {
+    if (!window.confirm("Are you sure you want to delete this source?")) return;
+    try {
+      const success = await deleteSource(id);
+      if (success) {
+        setSources((prev) => prev.filter((s) => s.id !== id));
+      }
+    } catch (error) {
+      console.error("Delete failed:", error);
+    }
+  };
 
   return (
     <div
@@ -201,13 +312,68 @@ const IncomePage = () => {
     >
       <div className="d-flex justify-content-between align-items-center mb-3">
         <h4>Income Overview</h4>
-        <Button onClick={handleShowAddModal}>
-          <i className="bi bi-plus-circle me-2"></i> New Income
-        </Button>
-        <Button variant="outline-secondary" onClick={handleLogout}>
-          Logout
-        </Button>
+        <div>
+          <Button className="me-2" onClick={handleShowAddModal}>
+            <i className="bi bi-plus-circle me-2"></i> Add Income
+          </Button>
+          <Button className="me-2" onClick={handleShowAddSourceModal}>
+            <i className="bi bi-plus-circle me-2"></i> Add Source
+          </Button>
+        </div>
       </div>
+
+      {error && <Alert variant="danger">{error}</Alert>}
+
+      <h5 className="mt-4">Income Sources</h5>
+
+      {loadingSources ? (
+        <Spinner animation="border" />
+      ) : (
+        <div className="table-responsive">
+          <table className="table table-striped table-hover align-middle">
+            <thead className="table-dark">
+              <tr>
+                <th>Name</th>
+                <th>Description</th>
+                <th style={{ width: "120px" }}>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {sourceList.length === 0 ? (
+                <tr>
+                  <td colSpan="3" className="text-center">
+                    No sources found
+                  </td>
+                </tr>
+              ) : (
+                sourceList.map((source) => (
+                  <tr key={source.id}>
+                    <td>{source.name}</td>
+                    <td>{source.description}</td>
+                    <td>
+                      <Button
+                        variant="outline-primary"
+                        size="sm"
+                        className="me-2"
+                        onClick={() => handleEditSource(source)}
+                      >
+                        <i className="bi bi-pencil"></i>
+                      </Button>
+                      <Button
+                        variant="outline-danger"
+                        size="sm"
+                        onClick={() => handleDeleteSource(source.id)}
+                      >
+                        <i className="bi bi-trash"></i>
+                      </Button>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+      )}
 
       {loading ? (
         <Spinner animation="border" />
@@ -250,22 +416,22 @@ const IncomePage = () => {
                         className="me-2"
                         onClick={() => handleShowEditModal(income)}
                       >
-                        <i className="bi bi-pencil-square"></i>
+                        <i className="bi bi-pencil"></i>
                       </Button>
                       <Button
                         variant="outline-success"
                         size="sm"
                         className="me-2"
-                        onClick={() => handleDuplicateNextMonth(income.id)}
+                        onClick={() => handleDuplicateIncome(income.id)}
                       >
-                        <i className="bi bi-calendar-plus"></i>
+                        <i className="bi bi-files"></i>
                       </Button>
                       <Button
                         variant="outline-danger"
                         size="sm"
                         onClick={() => handleDeleteIncome(income.id)}
                       >
-                        <i className="bi bi-trash3"></i>
+                        <i className="bi bi-trash"></i>
                       </Button>
                     </td>
                   </tr>
@@ -276,6 +442,7 @@ const IncomePage = () => {
         </div>
       )}
 
+      {/* Modal for Add/Edit */}
       <Modal show={showModal} onHide={() => setShowModal(false)}>
         <Form onSubmit={handleSaveIncome}>
           <Modal.Header closeButton>
@@ -291,7 +458,6 @@ const IncomePage = () => {
                 value={formData.owner}
                 onChange={handleFormChange}
                 required
-                readOnly
               />
             </Form.Group>
 
@@ -329,6 +495,21 @@ const IncomePage = () => {
             </Form.Group>
 
             <Form.Group className="mb-3">
+              <Form.Label>Recurrence</Form.Label>
+              <Form.Select
+                name="frequency"
+                value={formData.frequency}
+                onChange={handleFormChange}
+              >
+                <option value="None">One-time</option>
+                <option value="Weekly">Weekly</option>
+                <option value="ByWeekly">By Weekly</option>
+                <option value="Monthly">Monthly</option>
+                <option value="Yearly">Yearly</option>
+              </Form.Select>
+            </Form.Group>
+
+            <Form.Group className="mb-3">
               <Form.Check
                 type="checkbox"
                 label="Is Recurring?"
@@ -337,7 +518,6 @@ const IncomePage = () => {
                 onChange={handleFormChange}
               />
             </Form.Group>
-
             <Form.Group className="mb-3">
               <Form.Check
                 type="checkbox"
@@ -368,6 +548,50 @@ const IncomePage = () => {
             </Button>
           </Modal.Footer>
         </Form>
+      </Modal>
+
+      <Modal show={showSourceModal} onHide={() => setShowSourceModal(false)}>
+        <Modal.Header closeButton>
+          <Modal.Title>Add Source</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <Form>
+            <Form.Group>
+              <Form.Label>Source Type</Form.Label>
+              <Form.Control
+                type="text"
+                value={sourceFormData.sourceType}
+                onChange={(e) =>
+                  setSourceFormData({
+                    ...sourceFormData,
+                    sourceType: e.target.value,
+                  })
+                }
+              />
+            </Form.Group>
+            <Form.Group>
+              <Form.Label>Description</Form.Label>
+              <Form.Control
+                type="text"
+                value={sourceFormData.description}
+                onChange={(e) =>
+                  setSourceFormData({
+                    ...sourceFormData,
+                    description: e.target.value,
+                  })
+                }
+              />
+            </Form.Group>
+          </Form>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={() => setShowSourceModal(false)}>
+            Cancel
+          </Button>
+          <Button variant="primary" onClick={handleSaveSource}>
+            Save
+          </Button>
+        </Modal.Footer>
       </Modal>
     </div>
   );

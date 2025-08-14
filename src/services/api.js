@@ -24,27 +24,33 @@ export const getIncomes = async (userId) => {
   return await axios.get(`${API_BASE_URL}/income/user/${userId}`);
 };
 
-// export const getIncomesByMonth = async (userId, month, year) => {
-//   const url = `${API_BASE_URL}/income/by-month`;
-//   const params = { userId, month, year };
-
-//   console.log("Calling getIncomesByMonth API:", url);
-//   console.log("Query params:", params);
-
-//   const response = await axios.get(url, { params });
-
-//   console.log("getIncomesByMonth response:", response);
-//   return response;
-// };
-
 export const getIncomesByMonth = (userId, month, year) => {
   return axios.get(`${API_BASE_URL}/income/by-month`, {
     params: { userId, month, year },
   });
 };
 
+// export const addIncome = async (income) => {
+//   return await axios.post(`${API_BASE_URL}/income`, income);
+// };
+
 export const addIncome = async (income) => {
-  return await axios.post(`${API_BASE_URL}/income`, income);
+  return await axios.post(`${API_BASE_URL}/income`, {
+    userId: income.userId,
+    owner: income.owner,
+    sourceType: income.sourceType,
+    amount: parseFloat(income.amount),
+    date: income.date,
+    month: new Date(income.date).getMonth() + 1,
+    year: new Date(income.date).getFullYear(),
+    isRecurring: income.frequency !== "None",
+    isEstimated: income.isEstimated,
+    frequency: income.frequency, // <-- added
+    createdBy: income.createdBy,
+    createdDate: new Date().toISOString(),
+    modifiedDate: new Date().toISOString(),
+    description: income.description || "",
+  });
 };
 
 export const updateIncome = async (income) => {
@@ -55,6 +61,35 @@ export const deleteIncome = async (id) => {
   return await axios.delete(`${API_BASE_URL}/income/${id}`);
 };
 
-export const duplicateIncomeNextMonth = async (id) => {
+export const duplicateIncome = async (id) => {
   return await axios.post(`${API_BASE_URL}/income/${id}/duplicate-next-month`);
 };
+
+export const addSource = async (source) => {
+  return await axios.post(`${API_BASE_URL}/IncomeSource`, source);
+};
+export const getSources = async (userId) => {
+  return await axios.get(`http://localhost:5283/api/IncomeSource/${userId}`);
+};
+
+// Update an income source
+export async function updateSource(id, source) {
+  try {
+    const response = await axios.put(`${API_URL}/${id}`, source);
+    return response.data;
+  } catch (error) {
+    console.error("Error updating source:", error);
+    throw error;
+  }
+}
+
+// Delete an income source
+export async function deleteSource(id) {
+  try {
+    const response = await axios.delete(`${API_URL}/${id}`);
+    return response.status === 204; // true if deleted
+  } catch (error) {
+    console.error("Error deleting source:", error);
+    throw error;
+  }
+}
