@@ -4,6 +4,8 @@ import LoginPage from "../pages/Login";
 import RegisterPage from "../pages/Register";
 import DashboardPage from "../pages/DashboardPage";
 import IncomePage from "../pages/IncomePage";
+import ExpensesPage from "../pages/ExpensesPage"; // exact match
+
 import Layout from "../components/Layout";
 
 const AppRoutes = () => {
@@ -39,6 +41,16 @@ const AppRoutes = () => {
           </Layout>
         }
       />
+      <Route
+        path="/expenses"
+        element={
+          <Layout onLogout={handleLogout}>
+            <ExpensesPage />
+          </Layout>
+        }
+      />
+
+
     </Routes>
   );
 };
