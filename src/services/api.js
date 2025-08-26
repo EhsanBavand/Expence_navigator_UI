@@ -118,26 +118,97 @@ export async function deleteSource(id) {
 
 // ---------------- Categories ----------------
 
+// // Categories
+// export const getCategories = () =>
+//   axios.get(`${API_BASE_URL}/Category/categories`);
+// export const createCategory = (category) =>
+//   axios.post(`${API_BASE_URL}/Category/categories`, category);
+// export const updateCategory = (id, category) => {
+//   console.log("Sending update request for category:", category);
+//   return axios.put(`${API_BASE_URL}/Category/categories/${id}`, category);
+// };
+// export const deleteCategory = (id) =>
+//   axios.delete(`${API_BASE_URL}/Category/categories/${id}`);
+
+// // SubCategories
+// export const getSubCategories = () =>
+//   axios.get(`${API_BASE_URL}/Category/subcategories`);
+// export const createSubCategory = (subcategory) =>
+//   axios.post(`${API_BASE_URL}/Category/subcategories`, subcategory);
+// export const updateSubCategory = async (id, subcategory) => {
+//   console.log("📤 Sending update request for subcategory:", subcategory);
+//   try {
+//     const response = await axios.put(
+//       `${API_BASE_URL}/Category/subcategories/${id}`,
+//       subcategory
+//     );
+//     console.log("✅ Update successful:", response.data);
+//     return response.data;
+//   } catch (error) {
+//     console.error("❌ Error updating subcategory:", error);
+//     throw error;
+//   }
+// };
+// export const deleteSubCategory = (id) =>
+//   axios.delete(`${API_BASE_URL}/Category/subcategories/${id}`);
+
+// =====================
 // Categories
-export const getCategories = () =>
-  axios.get(`${API_BASE_URL}/Category/categories`);
+// =====================
 
+// Get all categories for a specific user
+
+export const getCategories = (userId) =>
+  axios.get(`${API_BASE_URL}/Category`, { params: { userId } });
+
+// Create a new category
 export const createCategory = (category) =>
-  axios.post(`${API_BASE_URL}/Category/categories`, category);
-export const updateCategory = (id, category) =>
-  axios.put(`${API_BASE_URL}/Category/categories/${id}`, category);
-export const deleteCategory = (id) =>
-  axios.delete(`${API_BASE_URL}/Category/categories/${id}`);
+  axios.post(`${API_BASE_URL}/Category`, category);
 
+// Update an existing category
+export const updateCategory = (id, category) => {
+  console.log("📤 Sending update request for category:", category);
+  return axios.put(`${API_BASE_URL}/Category/${id}`, category);
+};
+
+// Delete a category
+export const deleteCategory = (id) =>
+  axios.delete(`${API_BASE_URL}/Category/${id}`);
+
+// =====================
 // SubCategories
-export const getSubCategories = () =>
-  axios.get(`${API_BASE_URL}/Category/subcategories`);
+// =====================
+
+// Get all subcategories
+export const getSubCategories = () => axios.get(`${API_BASE_URL}/SubCategory`);
+
+// Get subcategories by category ID
+export const getSubCategoriesByCategory = (categoryId) =>
+  axios.get(`${API_BASE_URL}/SubCategory/by-category/${categoryId}`);
+
+// Create a new subcategory
 export const createSubCategory = (subcategory) =>
-  axios.post(`${API_BASE_URL}/Category/subcategories`, subcategory);
-export const updateSubCategory = (id, subcategory) =>
-  axios.put(`${API_BASE_URL}/Category/subcategories/${id}`, subcategory);
+  axios.post(`${API_BASE_URL}/SubCategory`, subcategory);
+
+// Update an existing subcategory
+export const updateSubCategory = async (id, subcategory) => {
+  console.log("📤 Sending update request for subcategory:", subcategory);
+  try {
+    const response = await axios.put(
+      `${API_BASE_URL}/SubCategory/${id}`,
+      subcategory
+    );
+    console.log("✅ Update successful:", response.data);
+    return response.data;
+  } catch (error) {
+    console.error("❌ Error updating subcategory:", error);
+    throw error;
+  }
+};
+
+// Delete a subcategory
 export const deleteSubCategory = (id) =>
-  axios.delete(`${API_BASE_URL}/Category/subcategories/${id}`);
+  axios.delete(`${API_BASE_URL}/SubCategory/${id}`);
 
 // // ---------------- Expenses ----------------
 
@@ -151,3 +222,29 @@ export const getExpenses = async () => {
 export const deleteExpense = async (id) => {
   return await axios.delete(`${API_BASE_URL}/Expense/${id}`);
 };
+
+// =====================
+// Places
+// =====================
+
+// ---------------- Places ----------------
+
+// Get all places
+export const getPlaces = () => axios.get(`${API_BASE_URL}/Place`);
+
+// Create a new place
+export const createPlace = (place) =>
+  axios.post(`${API_BASE_URL}/Place`, place);
+
+// Update a place
+export const updatePlace = (id, place) =>
+  axios.put(`${API_BASE_URL}/Place/${id}`, place);
+
+// Delete a place
+export const deletePlace = (id) => axios.delete(`${API_BASE_URL}/Place/${id}`);
+
+// Get places for dropdown (optional: filter by category)
+export const getPlacesForDropdown = (categoryId) =>
+  axios.get(`${API_BASE_URL}/Place/placesdropdown`, {
+    params: { categoryId },
+  });
