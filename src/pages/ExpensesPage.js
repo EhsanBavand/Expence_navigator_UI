@@ -920,35 +920,421 @@
 //   );
 // };
 
+// // export default ExpensesPage;
+
+// import React, { useState, useEffect } from "react";
+// import {
+//   getCategories,
+//   createCategory,
+//   getSubCategories,
+//   createSubCategory,
+//   getSubCategoriesByCategory,
+//   createPlace,
+//   getPlacesForDropdown,
+//   addExpense,
+// } from "../services/api";
+
+// const ExpensesPage = () => {
+//   const [categories, setCategories] = useState([]);
+//   const [subCategories, setSubCategories] = useState([]);
+//   const [places, setPlaces] = useState([]);
+
+//   const [categoryName, setCategoryName] = useState("");
+//   const [subCategoryName, setSubCategoryName] = useState("");
+//   const [selectedCategory, setSelectedCategory] = useState("");
+
+//   const [placeName, setPlaceName] = useState("");
+//   const [selectedCategoryForPlace, setSelectedCategoryForPlace] = useState("");
+//   const [selectedSubCategoryForPlace, setSelectedSubCategoryForPlace] =
+//     useState("");
+
+//   const [form, setForm] = useState({
+//     category: "",
+//     subCategory: "",
+//     place: "",
+//     store: "",
+//     amount: "",
+//     paidFor: "",
+//     note: "",
+//     isFixed: false,
+//   });
+
+//   const userId = "3385087b-7c66-4525-b55c-adc3c61dc3f8"; // replace with logged-in userId
+
+//   useEffect(() => {
+//     const loadData = async () => {
+//       try {
+//         const catRes = await getCategories(userId);
+//         setCategories(catRes.data || []);
+
+//         const subRes = await getSubCategories();
+//         setSubCategories(subRes.data || []);
+
+//         const placeRes = await getPlacesForDropdown();
+//         setPlaces(placeRes.data || []);
+//       } catch (err) {
+//         console.error("Failed to load data:", err.response?.data || err);
+//       }
+//     };
+//     loadData();
+//   }, []);
+
+//   // ===== Handlers =====
+//   const handleAddCategory = async (e) => {
+//     e.preventDefault();
+//     if (!categoryName) return;
+//     try {
+//       const res = await createCategory({ name: categoryName, userId });
+//       setCategories([...categories, res.data]);
+//       setCategoryName("");
+//     } catch (err) {
+//       console.error(err);
+//     }
+//   };
+
+//   const handleAddSubCategory = async (e) => {
+//     e.preventDefault();
+//     if (!subCategoryName || !selectedCategory) return;
+//     try {
+//       const res = await createSubCategory({
+//         name: subCategoryName,
+//         categoryId: selectedCategory,
+//       });
+//       setSubCategories([...subCategories, res.data]);
+//       setSubCategoryName("");
+//       setSelectedCategory("");
+//     } catch (err) {
+//       console.error(err);
+//     }
+//   };
+
+//   const handleAddPlace = async (e) => {
+//     e.preventDefault();
+//     if (!placeName || !selectedCategoryForPlace) return;
+//     try {
+//       const res = await createPlace({
+//         name: placeName,
+//         userId,
+//         categoryId: selectedCategoryForPlace,
+//         subCategoryId: selectedSubCategoryForPlace || null,
+//       });
+//       setPlaces([...places, res.data]);
+//       setPlaceName("");
+//       setSelectedCategoryForPlace("");
+//       setSelectedSubCategoryForPlace("");
+//     } catch (err) {
+//       console.error(err.response?.data || err);
+//     }
+//   };
+
+//   const handleCategoryChange = (e) => {
+//     const categoryId = e.target.value;
+//     setForm({ ...form, category: categoryId, subCategory: "", place: "" });
+//   };
+
+//   const handleChange = (e) => {
+//     const { name, value, type, checked } = e.target;
+//     setForm({
+//       ...form,
+//       [name]: type === "checkbox" ? checked : value,
+//     });
+//   };
+
+//   const handleAddExpense = async (e) => {
+//     e.preventDefault();
+//     try {
+//       await addExpense({ ...form, userId });
+//       alert("Expense added successfully!");
+//       setForm({
+//         category: "",
+//         subCategory: "",
+//         place: "",
+//         store: "",
+//         amount: "",
+//         paidFor: "",
+//         note: "",
+//         isFixed: false,
+//       });
+//     } catch (err) {
+//       console.error(err.response?.data || err);
+//     }
+//   };
+
+//   return (
+//     <div className="container my-4">
+//       <div className="row g-3">
+//         {/* Left: Category / SubCategory / Place */}
+//         <div className="col-12 col-md-6 col-lg-4">
+//           <div className="card h-100 shadow-sm mb-3">
+//             <div className="card-header bg-primary text-white">
+//               Category & SubCategory
+//             </div>
+//             <div className="card-body">
+//               <form onSubmit={handleAddCategory}>
+//                 <input
+//                   type="text"
+//                   className="form-control mb-2"
+//                   placeholder="Category"
+//                   value={categoryName}
+//                   onChange={(e) => setCategoryName(e.target.value)}
+//                 />
+//                 <button className="btn btn-primary w-100 mb-2">
+//                   Add Category
+//                 </button>
+//               </form>
+
+//               <form onSubmit={handleAddSubCategory}>
+//                 <input
+//                   type="text"
+//                   className="form-control mb-2"
+//                   placeholder="SubCategory"
+//                   value={subCategoryName}
+//                   onChange={(e) => setSubCategoryName(e.target.value)}
+//                 />
+//                 <select
+//                   className="form-select mb-2"
+//                   value={selectedCategory}
+//                   onChange={(e) => setSelectedCategory(e.target.value)}
+//                 >
+//                   <option value="">-- Select Category --</option>
+//                   {categories.map((cat) => (
+//                     <option key={cat.id} value={cat.id}>
+//                       {cat.name}
+//                     </option>
+//                   ))}
+//                 </select>
+//                 <button className="btn btn-primary w-100">
+//                   Add SubCategory
+//                 </button>
+//               </form>
+//             </div>
+//           </div>
+
+//           <div className="card h-100 shadow-sm mb-3">
+//             <div className="card-header bg-warning text-dark">Add Place</div>
+//             <div className="card-body">
+//               <form onSubmit={handleAddPlace}>
+//                 <input
+//                   type="text"
+//                   className="form-control mb-2"
+//                   placeholder="Place Name"
+//                   value={placeName}
+//                   onChange={(e) => setPlaceName(e.target.value)}
+//                   required
+//                 />
+//                 <select
+//                   className="form-select mb-2"
+//                   value={selectedCategoryForPlace}
+//                   onChange={(e) => setSelectedCategoryForPlace(e.target.value)}
+//                   required
+//                 >
+//                   <option value="">-- Select Category --</option>
+//                   {categories.map((cat) => (
+//                     <option key={cat.id} value={cat.id}>
+//                       {cat.name}
+//                     </option>
+//                   ))}
+//                 </select>
+//                 <select
+//                   className="form-select mb-2"
+//                   value={selectedSubCategoryForPlace}
+//                   onChange={(e) =>
+//                     setSelectedSubCategoryForPlace(e.target.value)
+//                   }
+//                 >
+//                   <option value="">-- Select SubCategory (Optional) --</option>
+//                   {subCategories
+//                     .filter((sc) => sc.categoryId === selectedCategoryForPlace)
+//                     .map((sc) => (
+//                       <option key={sc.id} value={sc.id}>
+//                         {sc.name}
+//                       </option>
+//                     ))}
+//                 </select>
+//                 <button className="btn btn-warning w-100">Add Place</button>
+//               </form>
+//             </div>
+//           </div>
+//         </div>
+
+//         {/* Right: Expense Form */}
+//         <div className="col-12 col-md-6 col-lg-8">
+//           <div className="card h-100 shadow-sm">
+//             <div className="card-header bg-success text-white">Add Expense</div>
+//             <div className="card-body">
+//               <form onSubmit={handleAddExpense}>
+//                 <div className="row g-2">
+//                   <div className="col-12 col-sm-6">
+//                     <select
+//                       className="form-select"
+//                       name="category"
+//                       value={form.category}
+//                       onChange={handleCategoryChange}
+//                       required
+//                     >
+//                       <option value="">Select Category</option>
+//                       {categories.map((c) => (
+//                         <option key={c.id} value={c.id}>
+//                           {c.name}
+//                         </option>
+//                       ))}
+//                     </select>
+//                   </div>
+//                   <div className="col-12 col-sm-6">
+//                     <select
+//                       className="form-select"
+//                       name="subCategory"
+//                       value={form.subCategory}
+//                       onChange={handleChange}
+//                       required
+//                     >
+//                       <option value="">Select Sub Category</option>
+//                       {subCategories
+//                         .filter((sc) => sc.categoryId === form.category)
+//                         .map((sc) => (
+//                           <option key={sc.id} value={sc.id}>
+//                             {sc.name}
+//                           </option>
+//                         ))}
+//                     </select>
+//                   </div>
+//                   <div className="col-12 col-sm-6">
+//                     <select
+//                       className="form-select"
+//                       name="place"
+//                       value={form.place}
+//                       onChange={handleChange}
+//                     >
+//                       <option value="">Select Place</option>
+//                       {places
+//                         .filter((p) => p.categoryId === form.category)
+//                         .map((p) => (
+//                           <option key={p.id} value={p.id}>
+//                             {p.name}
+//                           </option>
+//                         ))}
+//                     </select>
+//                   </div>
+//                   <div className="col-12 col-sm-6">
+//                     <input
+//                       type="text"
+//                       name="store"
+//                       className="form-control"
+//                       placeholder="Store"
+//                       value={form.store}
+//                       onChange={handleChange}
+//                     />
+//                   </div>
+//                   <div className="col-12 col-sm-6">
+//                     <input
+//                       type="number"
+//                       name="amount"
+//                       className="form-control"
+//                       placeholder="Amount"
+//                       value={form.amount}
+//                       onChange={handleChange}
+//                       required
+//                     />
+//                   </div>
+//                   <div className="col-12 col-sm-6">
+//                     <input
+//                       type="text"
+//                       name="paidFor"
+//                       className="form-control"
+//                       placeholder="Paid For"
+//                       value={form.paidFor}
+//                       onChange={handleChange}
+//                     />
+//                   </div>
+//                   <div className="col-12">
+//                     <textarea
+//                       name="note"
+//                       className="form-control"
+//                       placeholder="Note"
+//                       value={form.note}
+//                       onChange={handleChange}
+//                     />
+//                   </div>
+//                   <div className="col-12">
+//                     <div className="form-check">
+//                       <input
+//                         className="form-check-input"
+//                         type="checkbox"
+//                         name="isFixed"
+//                         checked={form.isFixed}
+//                         onChange={handleChange}
+//                       />
+//                       <label className="form-check-label">Fixed Expense</label>
+//                     </div>
+//                   </div>
+//                   <div className="col-12">
+//                     <button type="submit" className="btn btn-success w-100">
+//                       Add Expense
+//                     </button>
+//                   </div>
+//                 </div>
+//               </form>
+//             </div>
+//           </div>
+//         </div>
+//       </div>
+
+//       {/* Place Table */}
+//       {/* <div className="card mt-3 shadow-sm">
+//         <div className="card-header bg-info text-white">Places</div>
+//         <div className="card-body table-responsive">
+//           <table className="table table-bordered table-striped">
+//             <thead>
+//               <tr>
+//                 <th>Category</th>
+//                 <th>SubCategory</th>
+//                 <th>Place</th>
+//               </tr>
+//             </thead>
+//             <tbody>
+//               {places.map((place) => (
+//                 <tr key={place.id}>
+//                   <td>
+//                     {categories.find((c) => c.id === place.categoryId)?.name ||
+//                       "-"}
+//                   </td>
+//                   <td>
+//                     {subCategories.find((sc) => sc.id === place.subCategoryId)
+//                       ?.name || "-"}
+//                   </td>
+//                   <td>{place.name}</td>
+//                 </tr>
+//               ))}
+//             </tbody>
+//           </table>
+//         </div>
+//       </div> */}
+//     </div>
+//   );
+// };
+
 // export default ExpensesPage;
 
-import React, { useState, useEffect } from "react";
-import {
-  getCategories,
-  createCategory,
-  getSubCategories,
-  createSubCategory,
-  getSubCategoriesByCategory,
-  createPlace,
-  getPlacesForDropdown,
-  addExpense,
-} from "../services/api";
+import React, { useState } from "react";
+import "bootstrap/dist/css/bootstrap.min.css";
 
-const ExpensesPage = () => {
+export default function ExpenseManager() {
+  const [activeTab, setActiveTab] = useState("category");
+
   const [categories, setCategories] = useState([]);
   const [subCategories, setSubCategories] = useState([]);
   const [places, setPlaces] = useState([]);
+  const [expenses, setExpenses] = useState([]);
 
   const [categoryName, setCategoryName] = useState("");
   const [subCategoryName, setSubCategoryName] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("");
-
   const [placeName, setPlaceName] = useState("");
   const [selectedCategoryForPlace, setSelectedCategoryForPlace] = useState("");
   const [selectedSubCategoryForPlace, setSelectedSubCategoryForPlace] =
     useState("");
 
-  const [form, setForm] = useState({
+  const [expenseForm, setExpenseForm] = useState({
     category: "",
     subCategory: "",
     place: "",
@@ -959,135 +1345,170 @@ const ExpensesPage = () => {
     isFixed: false,
   });
 
-  const userId = "3385087b-7c66-4525-b55c-adc3c61dc3f8"; // replace with logged-in userId
-
-  useEffect(() => {
-    const loadData = async () => {
-      try {
-        const catRes = await getCategories(userId);
-        setCategories(catRes.data || []);
-
-        const subRes = await getSubCategories();
-        setSubCategories(subRes.data || []);
-
-        const placeRes = await getPlacesForDropdown();
-        setPlaces(placeRes.data || []);
-      } catch (err) {
-        console.error("Failed to load data:", err.response?.data || err);
-      }
-    };
-    loadData();
-  }, []);
-
-  // ===== Handlers =====
-  const handleAddCategory = async (e) => {
+  // Handlers
+  const handleAddCategory = (e) => {
     e.preventDefault();
     if (!categoryName) return;
-    try {
-      const res = await createCategory({ name: categoryName, userId });
-      setCategories([...categories, res.data]);
-      setCategoryName("");
-    } catch (err) {
-      console.error(err);
-    }
+    setCategories([...categories, { id: Date.now(), name: categoryName }]);
+    setCategoryName("");
   };
 
-  const handleAddSubCategory = async (e) => {
+  const handleAddSubCategory = (e) => {
     e.preventDefault();
     if (!subCategoryName || !selectedCategory) return;
-    try {
-      const res = await createSubCategory({
-        name: subCategoryName,
-        categoryId: selectedCategory,
-      });
-      setSubCategories([...subCategories, res.data]);
-      setSubCategoryName("");
-      setSelectedCategory("");
-    } catch (err) {
-      console.error(err);
-    }
+    setSubCategories([
+      ...subCategories,
+      { id: Date.now(), name: subCategoryName, categoryId: selectedCategory },
+    ]);
+    setSubCategoryName("");
+    setSelectedCategory("");
   };
 
-  const handleAddPlace = async (e) => {
+  const handleAddPlace = (e) => {
     e.preventDefault();
     if (!placeName || !selectedCategoryForPlace) return;
-    try {
-      const res = await createPlace({
+    setPlaces([
+      ...places,
+      {
+        id: Date.now(),
         name: placeName,
-        userId,
         categoryId: selectedCategoryForPlace,
         subCategoryId: selectedSubCategoryForPlace || null,
-      });
-      setPlaces([...places, res.data]);
-      setPlaceName("");
-      setSelectedCategoryForPlace("");
-      setSelectedSubCategoryForPlace("");
-    } catch (err) {
-      console.error(err.response?.data || err);
-    }
+      },
+    ]);
+    setPlaceName("");
+    setSelectedCategoryForPlace("");
+    setSelectedSubCategoryForPlace("");
   };
 
-  const handleCategoryChange = (e) => {
-    const categoryId = e.target.value;
-    setForm({ ...form, category: categoryId, subCategory: "", place: "" });
+  const handleAddExpense = (e) => {
+    e.preventDefault();
+    if (
+      !expenseForm.category ||
+      !expenseForm.subCategory ||
+      !expenseForm.amount
+    )
+      return;
+    setExpenses([...expenses, { ...expenseForm, id: Date.now() }]);
+    setExpenseForm({
+      category: "",
+      subCategory: "",
+      place: "",
+      store: "",
+      amount: "",
+      paidFor: "",
+      note: "",
+      isFixed: false,
+    });
   };
 
-  const handleChange = (e) => {
+  const handleExpenseChange = (e) => {
     const { name, value, type, checked } = e.target;
-    setForm({
-      ...form,
+    setExpenseForm({
+      ...expenseForm,
       [name]: type === "checkbox" ? checked : value,
     });
   };
 
-  const handleAddExpense = async (e) => {
-    e.preventDefault();
-    try {
-      await addExpense({ ...form, userId });
-      alert("Expense added successfully!");
-      setForm({
-        category: "",
-        subCategory: "",
-        place: "",
-        store: "",
-        amount: "",
-        paidFor: "",
-        note: "",
-        isFixed: false,
-      });
-    } catch (err) {
-      console.error(err.response?.data || err);
-    }
+  const handleDelete = (id, type) => {
+    if (type === "category")
+      setCategories(categories.filter((c) => c.id !== id));
+    if (type === "subCategory")
+      setSubCategories(subCategories.filter((c) => c.id !== id));
+    if (type === "place") setPlaces(places.filter((c) => c.id !== id));
+    if (type === "expense") setExpenses(expenses.filter((c) => c.id !== id));
   };
 
   return (
     <div className="container my-4">
-      <div className="row g-3">
-        {/* Left: Category / SubCategory / Place */}
-        <div className="col-12 col-md-6 col-lg-4">
-          <div className="card h-100 shadow-sm mb-3">
-            <div className="card-header bg-primary text-white">
-              Category & SubCategory
-            </div>
-            <div className="card-body">
-              <form onSubmit={handleAddCategory}>
+      <div className="row">
+        {/* Left Column: Category / SubCategory / Place */}
+        <div className="col-12 col-lg-4 mb-4">
+          <ul className="nav nav-tabs mb-3" role="tablist">
+            <li className="nav-item">
+              <button
+                className={`nav-link ${
+                  activeTab === "category" ? "active" : ""
+                }`}
+                onClick={() => setActiveTab("category")}
+              >
+                Category
+              </button>
+            </li>
+            <li className="nav-item">
+              <button
+                className={`nav-link ${
+                  activeTab === "subCategory" ? "active" : ""
+                }`}
+                onClick={() => setActiveTab("subCategory")}
+              >
+                SubCategory
+              </button>
+            </li>
+            <li className="nav-item">
+              <button
+                className={`nav-link ${activeTab === "place" ? "active" : ""}`}
+                onClick={() => setActiveTab("place")}
+              >
+                Place
+              </button>
+            </li>
+          </ul>
+
+          {/* Tab Content */}
+          {activeTab === "category" && (
+            <div className="card p-3 shadow-sm">
+              <form onSubmit={handleAddCategory} className="mb-3">
                 <input
                   type="text"
                   className="form-control mb-2"
-                  placeholder="Category"
+                  placeholder="Category Name"
                   value={categoryName}
                   onChange={(e) => setCategoryName(e.target.value)}
                 />
-                <button className="btn btn-primary w-100 mb-2">
-                  Add Category
-                </button>
+                <button className="btn btn-primary w-100">Add Category</button>
               </form>
 
-              <form onSubmit={handleAddSubCategory}>
+              <table className="table table-bordered table-sm mb-0">
+                <thead>
+                  <tr>
+                    <th>Name</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {categories.map((cat) => (
+                    <tr key={cat.id}>
+                      <td>{cat.name}</td>
+                      <td>
+                        <button
+                          className="btn btn-sm btn-danger"
+                          onClick={() => handleDelete(cat.id, "category")}
+                        >
+                          Delete
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                  {categories.length === 0 && (
+                    <tr>
+                      <td colSpan={2} className="text-center">
+                        No categories
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          )}
+
+          {activeTab === "subCategory" && (
+            <div className="card p-3 shadow-sm">
+              <form onSubmit={handleAddSubCategory} className="mb-3">
                 <input
                   type="text"
                   className="form-control mb-2"
-                  placeholder="SubCategory"
+                  placeholder="SubCategory Name"
                   value={subCategoryName}
                   onChange={(e) => setSubCategoryName(e.target.value)}
                 />
@@ -1095,11 +1516,12 @@ const ExpensesPage = () => {
                   className="form-select mb-2"
                   value={selectedCategory}
                   onChange={(e) => setSelectedCategory(e.target.value)}
+                  required
                 >
-                  <option value="">-- Select Category --</option>
-                  {categories.map((cat) => (
-                    <option key={cat.id} value={cat.id}>
-                      {cat.name}
+                  <option value="">-- Select Parent Category --</option>
+                  {categories.map((c) => (
+                    <option key={c.id} value={c.id}>
+                      {c.name}
                     </option>
                   ))}
                 </select>
@@ -1107,13 +1529,48 @@ const ExpensesPage = () => {
                   Add SubCategory
                 </button>
               </form>
-            </div>
-          </div>
 
-          <div className="card h-100 shadow-sm mb-3">
-            <div className="card-header bg-warning text-dark">Add Place</div>
-            <div className="card-body">
-              <form onSubmit={handleAddPlace}>
+              <table className="table table-bordered table-sm mb-0">
+                <thead>
+                  <tr>
+                    <th>Name</th>
+                    <th>Category</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {subCategories.map((sc) => (
+                    <tr key={sc.id}>
+                      <td>{sc.name}</td>
+                      <td>
+                        {categories.find((c) => c.id === sc.categoryId)?.name ||
+                          "-"}
+                      </td>
+                      <td>
+                        <button
+                          className="btn btn-sm btn-danger"
+                          onClick={() => handleDelete(sc.id, "subCategory")}
+                        >
+                          Delete
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                  {subCategories.length === 0 && (
+                    <tr>
+                      <td colSpan={3} className="text-center">
+                        No subcategories
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          )}
+
+          {activeTab === "place" && (
+            <div className="card p-3 shadow-sm">
+              <form onSubmit={handleAddPlace} className="mb-3">
                 <input
                   type="text"
                   className="form-control mb-2"
@@ -1129,9 +1586,9 @@ const ExpensesPage = () => {
                   required
                 >
                   <option value="">-- Select Category --</option>
-                  {categories.map((cat) => (
-                    <option key={cat.id} value={cat.id}>
-                      {cat.name}
+                  {categories.map((c) => (
+                    <option key={c.id} value={c.id}>
+                      {c.name}
                     </option>
                   ))}
                 </select>
@@ -1153,164 +1610,227 @@ const ExpensesPage = () => {
                 </select>
                 <button className="btn btn-warning w-100">Add Place</button>
               </form>
+
+              <table className="table table-bordered table-sm mb-0">
+                <thead>
+                  <tr>
+                    <th>Name</th>
+                    <th>Category</th>
+                    <th>SubCategory</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {places.map((p) => (
+                    <tr key={p.id}>
+                      <td>{p.name}</td>
+                      <td>
+                        {categories.find((c) => c.id === p.categoryId)?.name ||
+                          "-"}
+                      </td>
+                      <td>
+                        {subCategories.find((sc) => sc.id === p.subCategoryId)
+                          ?.name || "-"}
+                      </td>
+                      <td>
+                        <button
+                          className="btn btn-sm btn-danger"
+                          onClick={() => handleDelete(p.id, "place")}
+                        >
+                          Delete
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                  {places.length === 0 && (
+                    <tr>
+                      <td colSpan={4} className="text-center">
+                        No places
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
             </div>
-          </div>
+          )}
         </div>
 
-        {/* Right: Expense Form */}
-        <div className="col-12 col-md-6 col-lg-8">
-          <div className="card h-100 shadow-sm">
-            <div className="card-header bg-success text-white">Add Expense</div>
-            <div className="card-body">
-              <form onSubmit={handleAddExpense}>
-                <div className="row g-2">
-                  <div className="col-12 col-sm-6">
-                    <select
-                      className="form-select"
-                      name="category"
-                      value={form.category}
-                      onChange={handleCategoryChange}
-                      required
-                    >
-                      <option value="">Select Category</option>
-                      {categories.map((c) => (
-                        <option key={c.id} value={c.id}>
-                          {c.name}
+        {/* Right Column: Expense Form & Table */}
+        <div className="col-12 col-lg-8">
+          <div className="card p-3 shadow-sm mb-4">
+            <h5 className="card-title mb-3">Add Expense</h5>
+            <form onSubmit={handleAddExpense}>
+              <div className="row g-2">
+                <div className="col-12 col-sm-6">
+                  <select
+                    className="form-select"
+                    name="category"
+                    value={expenseForm.category}
+                    onChange={handleExpenseChange}
+                    required
+                  >
+                    <option value="">Select Category</option>
+                    {categories.map((c) => (
+                      <option key={c.id} value={c.id}>
+                        {c.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div className="col-12 col-sm-6">
+                  <select
+                    className="form-select"
+                    name="subCategory"
+                    value={expenseForm.subCategory}
+                    onChange={handleExpenseChange}
+                    required
+                  >
+                    <option value="">Select SubCategory</option>
+                    {subCategories
+                      .filter((sc) => sc.categoryId === expenseForm.category)
+                      .map((sc) => (
+                        <option key={sc.id} value={sc.id}>
+                          {sc.name}
                         </option>
                       ))}
-                    </select>
-                  </div>
-                  <div className="col-12 col-sm-6">
-                    <select
-                      className="form-select"
-                      name="subCategory"
-                      value={form.subCategory}
-                      onChange={handleChange}
-                      required
-                    >
-                      <option value="">Select Sub Category</option>
-                      {subCategories
-                        .filter((sc) => sc.categoryId === form.category)
-                        .map((sc) => (
-                          <option key={sc.id} value={sc.id}>
-                            {sc.name}
-                          </option>
-                        ))}
-                    </select>
-                  </div>
-                  <div className="col-12 col-sm-6">
-                    <select
-                      className="form-select"
-                      name="place"
-                      value={form.place}
-                      onChange={handleChange}
-                    >
-                      <option value="">Select Place</option>
-                      {places
-                        .filter((p) => p.categoryId === form.category)
-                        .map((p) => (
-                          <option key={p.id} value={p.id}>
-                            {p.name}
-                          </option>
-                        ))}
-                    </select>
-                  </div>
-                  <div className="col-12 col-sm-6">
+                  </select>
+                </div>
+                <div className="col-12 col-sm-6">
+                  <select
+                    className="form-select"
+                    name="place"
+                    value={expenseForm.place}
+                    onChange={handleExpenseChange}
+                  >
+                    <option value="">Select Place</option>
+                    {places
+                      .filter((p) => p.categoryId === expenseForm.category)
+                      .map((p) => (
+                        <option key={p.id} value={p.id}>
+                          {p.name}
+                        </option>
+                      ))}
+                  </select>
+                </div>
+                <div className="col-12 col-sm-6">
+                  <input
+                    type="text"
+                    name="store"
+                    className="form-control"
+                    placeholder="Store"
+                    value={expenseForm.store}
+                    onChange={handleExpenseChange}
+                  />
+                </div>
+                <div className="col-12 col-sm-6">
+                  <input
+                    type="number"
+                    name="amount"
+                    className="form-control"
+                    placeholder="Amount"
+                    value={expenseForm.amount}
+                    onChange={handleExpenseChange}
+                    required
+                  />
+                </div>
+                <div className="col-12 col-sm-6">
+                  <input
+                    type="text"
+                    name="paidFor"
+                    className="form-control"
+                    placeholder="Paid For"
+                    value={expenseForm.paidFor}
+                    onChange={handleExpenseChange}
+                  />
+                </div>
+                <div className="col-12">
+                  <textarea
+                    name="note"
+                    className="form-control"
+                    placeholder="Note"
+                    value={expenseForm.note}
+                    onChange={handleExpenseChange}
+                  />
+                </div>
+                <div className="col-12">
+                  <div className="form-check mb-2">
                     <input
-                      type="text"
-                      name="store"
-                      className="form-control"
-                      placeholder="Store"
-                      value={form.store}
-                      onChange={handleChange}
+                      type="checkbox"
+                      name="isFixed"
+                      className="form-check-input"
+                      checked={expenseForm.isFixed}
+                      onChange={handleExpenseChange}
                     />
-                  </div>
-                  <div className="col-12 col-sm-6">
-                    <input
-                      type="number"
-                      name="amount"
-                      className="form-control"
-                      placeholder="Amount"
-                      value={form.amount}
-                      onChange={handleChange}
-                      required
-                    />
-                  </div>
-                  <div className="col-12 col-sm-6">
-                    <input
-                      type="text"
-                      name="paidFor"
-                      className="form-control"
-                      placeholder="Paid For"
-                      value={form.paidFor}
-                      onChange={handleChange}
-                    />
-                  </div>
-                  <div className="col-12">
-                    <textarea
-                      name="note"
-                      className="form-control"
-                      placeholder="Note"
-                      value={form.note}
-                      onChange={handleChange}
-                    />
-                  </div>
-                  <div className="col-12">
-                    <div className="form-check">
-                      <input
-                        className="form-check-input"
-                        type="checkbox"
-                        name="isFixed"
-                        checked={form.isFixed}
-                        onChange={handleChange}
-                      />
-                      <label className="form-check-label">Fixed Expense</label>
-                    </div>
-                  </div>
-                  <div className="col-12">
-                    <button type="submit" className="btn btn-success w-100">
-                      Add Expense
-                    </button>
+                    <label className="form-check-label">Fixed Expense</label>
                   </div>
                 </div>
-              </form>
+                <div className="col-12">
+                  <button className="btn btn-success w-100">Add Expense</button>
+                </div>
+              </div>
+            </form>
+          </div>
+
+          {/* Expense Table */}
+          <div className="card p-3 shadow-sm">
+            <h5 className="card-title mb-3">Expenses</h5>
+            <div className="table-responsive">
+              <table className="table table-bordered table-striped table-sm mb-0">
+                <thead>
+                  <tr>
+                    <th>Category</th>
+                    <th>SubCategory</th>
+                    <th>Place</th>
+                    <th>Store</th>
+                    <th>Amount</th>
+                    <th>Paid For</th>
+                    <th>Note</th>
+                    <th>Fixed</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {expenses.map((exp) => (
+                    <tr key={exp.id}>
+                      <td>
+                        {categories.find((c) => c.id === exp.category)?.name ||
+                          "-"}
+                      </td>
+                      <td>
+                        {subCategories.find((sc) => sc.id === exp.subCategory)
+                          ?.name || "-"}
+                      </td>
+                      <td>
+                        {places.find((p) => p.id === exp.place)?.name || "-"}
+                      </td>
+                      <td>{exp.store}</td>
+                      <td>{exp.amount}</td>
+                      <td>{exp.paidFor}</td>
+                      <td>{exp.note}</td>
+                      <td>{exp.isFixed ? "Yes" : "No"}</td>
+                      <td>
+                        <button
+                          className="btn btn-sm btn-danger"
+                          onClick={() => handleDelete(exp.id, "expense")}
+                        >
+                          Delete
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                  {expenses.length === 0 && (
+                    <tr>
+                      <td colSpan={9} className="text-center">
+                        No expenses
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
             </div>
           </div>
-        </div>
-      </div>
-
-      {/* Place Table */}
-      <div className="card mt-3 shadow-sm">
-        <div className="card-header bg-info text-white">Places</div>
-        <div className="card-body table-responsive">
-          <table className="table table-bordered table-striped">
-            <thead>
-              <tr>
-                <th>Category</th>
-                <th>SubCategory</th>
-                <th>Place</th>
-              </tr>
-            </thead>
-            <tbody>
-              {places.map((place) => (
-                <tr key={place.id}>
-                  <td>
-                    {categories.find((c) => c.id === place.categoryId)?.name ||
-                      "-"}
-                  </td>
-                  <td>
-                    {subCategories.find((sc) => sc.id === place.subCategoryId)
-                      ?.name || "-"}
-                  </td>
-                  <td>{place.name}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
         </div>
       </div>
     </div>
   );
-};
-
-export default ExpensesPage;
+}
