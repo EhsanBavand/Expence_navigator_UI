@@ -1315,17 +1315,1081 @@
 
 // export default ExpensesPage;
 
-import React, { useState } from "react";
+// // ----------------------------------------------
+// import React, { useState } from "react";
+// import "bootstrap/dist/css/bootstrap.min.css";
+
+// export default function ExpenseManager() {
+//   const [activeTab, setActiveTab] = useState("category");
+
+//   const [categories, setCategories] = useState([]);
+//   const [subCategories, setSubCategories] = useState([]);
+//   const [places, setPlaces] = useState([]);
+//   const [expenses, setExpenses] = useState([]);
+
+//   const [categoryName, setCategoryName] = useState("");
+//   const [subCategoryName, setSubCategoryName] = useState("");
+//   const [selectedCategory, setSelectedCategory] = useState("");
+//   const [placeName, setPlaceName] = useState("");
+//   const [selectedCategoryForPlace, setSelectedCategoryForPlace] = useState("");
+//   const [selectedSubCategoryForPlace, setSelectedSubCategoryForPlace] =
+//     useState("");
+
+//   const [expenseForm, setExpenseForm] = useState({
+//     category: "",
+//     subCategory: "",
+//     place: "",
+//     store: "",
+//     amount: "",
+//     paidFor: "",
+//     note: "",
+//     isFixed: false,
+//   });
+
+//   // Handlers
+//   const handleAddCategory = (e) => {
+//     e.preventDefault();
+//     if (!categoryName) return;
+//     setCategories([...categories, { id: Date.now(), name: categoryName }]);
+//     setCategoryName("");
+//   };
+
+//   const handleAddSubCategory = (e) => {
+//     e.preventDefault();
+//     if (!subCategoryName || !selectedCategory) return;
+//     setSubCategories([
+//       ...subCategories,
+//       { id: Date.now(), name: subCategoryName, categoryId: selectedCategory },
+//     ]);
+//     setSubCategoryName("");
+//     setSelectedCategory("");
+//   };
+
+//   const handleAddPlace = (e) => {
+//     e.preventDefault();
+//     if (!placeName || !selectedCategoryForPlace) return;
+//     setPlaces([
+//       ...places,
+//       {
+//         id: Date.now(),
+//         name: placeName,
+//         categoryId: selectedCategoryForPlace,
+//         subCategoryId: selectedSubCategoryForPlace || null,
+//       },
+//     ]);
+//     setPlaceName("");
+//     setSelectedCategoryForPlace("");
+//     setSelectedSubCategoryForPlace("");
+//   };
+
+//   const handleAddExpense = (e) => {
+//     e.preventDefault();
+//     if (
+//       !expenseForm.category ||
+//       !expenseForm.subCategory ||
+//       !expenseForm.amount
+//     )
+//       return;
+//     setExpenses([...expenses, { ...expenseForm, id: Date.now() }]);
+//     setExpenseForm({
+//       category: "",
+//       subCategory: "",
+//       place: "",
+//       store: "",
+//       amount: "",
+//       paidFor: "",
+//       note: "",
+//       isFixed: false,
+//     });
+//   };
+
+//   const handleExpenseChange = (e) => {
+//     const { name, value, type, checked } = e.target;
+//     setExpenseForm({
+//       ...expenseForm,
+//       [name]: type === "checkbox" ? checked : value,
+//     });
+//   };
+
+//   const handleDelete = (id, type) => {
+//     if (type === "category")
+//       setCategories(categories.filter((c) => c.id !== id));
+//     if (type === "subCategory")
+//       setSubCategories(subCategories.filter((c) => c.id !== id));
+//     if (type === "place") setPlaces(places.filter((c) => c.id !== id));
+//     if (type === "expense") setExpenses(expenses.filter((c) => c.id !== id));
+//   };
+
+//   return (
+//     <div className="container my-4">
+//       <div className="row">
+//         {/* Left Column: Category / SubCategory / Place */}
+//         <div className="col-12 col-lg-4 mb-4">
+//           <ul className="nav nav-tabs mb-3" role="tablist">
+//             <li className="nav-item">
+//               <button
+//                 className={`nav-link ${
+//                   activeTab === "category" ? "active" : ""
+//                 }`}
+//                 onClick={() => setActiveTab("category")}
+//               >
+//                 Category
+//               </button>
+//             </li>
+//             <li className="nav-item">
+//               <button
+//                 className={`nav-link ${
+//                   activeTab === "subCategory" ? "active" : ""
+//                 }`}
+//                 onClick={() => setActiveTab("subCategory")}
+//               >
+//                 SubCategory
+//               </button>
+//             </li>
+//             <li className="nav-item">
+//               <button
+//                 className={`nav-link ${activeTab === "place" ? "active" : ""}`}
+//                 onClick={() => setActiveTab("place")}
+//               >
+//                 Place
+//               </button>
+//             </li>
+//           </ul>
+
+//           {/* Tab Content */}
+//           {activeTab === "category" && (
+//             <div className="card p-3 shadow-sm">
+//               <form onSubmit={handleAddCategory} className="mb-3">
+//                 <input
+//                   type="text"
+//                   className="form-control mb-2"
+//                   placeholder="Category Name"
+//                   value={categoryName}
+//                   onChange={(e) => setCategoryName(e.target.value)}
+//                 />
+//                 <button className="btn btn-primary w-100">Add Category</button>
+//               </form>
+
+//               <table className="table table-bordered table-sm mb-0">
+//                 <thead>
+//                   <tr>
+//                     <th>Name</th>
+//                     <th>Action</th>
+//                   </tr>
+//                 </thead>
+//                 <tbody>
+//                   {categories.map((cat) => (
+//                     <tr key={cat.id}>
+//                       <td>{cat.name}</td>
+//                       <td>
+//                         <button
+//                           className="btn btn-sm btn-danger"
+//                           onClick={() => handleDelete(cat.id, "category")}
+//                         >
+//                           Delete
+//                         </button>
+//                       </td>
+//                     </tr>
+//                   ))}
+//                   {categories.length === 0 && (
+//                     <tr>
+//                       <td colSpan={2} className="text-center">
+//                         No categories
+//                       </td>
+//                     </tr>
+//                   )}
+//                 </tbody>
+//               </table>
+//             </div>
+//           )}
+
+//           {activeTab === "subCategory" && (
+//             <div className="card p-3 shadow-sm">
+//               <form onSubmit={handleAddSubCategory} className="mb-3">
+//                 <input
+//                   type="text"
+//                   className="form-control mb-2"
+//                   placeholder="SubCategory Name"
+//                   value={subCategoryName}
+//                   onChange={(e) => setSubCategoryName(e.target.value)}
+//                 />
+//                 <select
+//                   className="form-select mb-2"
+//                   value={selectedCategory}
+//                   onChange={(e) => setSelectedCategory(e.target.value)}
+//                   required
+//                 >
+//                   <option value="">-- Select Parent Category --</option>
+//                   {categories.map((c) => (
+//                     <option key={c.id} value={c.id}>
+//                       {c.name}
+//                     </option>
+//                   ))}
+//                 </select>
+//                 <button className="btn btn-primary w-100">
+//                   Add SubCategory
+//                 </button>
+//               </form>
+
+//               <table className="table table-bordered table-sm mb-0">
+//                 <thead>
+//                   <tr>
+//                     <th>Name</th>
+//                     <th>Category</th>
+//                     <th>Action</th>
+//                   </tr>
+//                 </thead>
+//                 <tbody>
+//                   {subCategories.map((sc) => (
+//                     <tr key={sc.id}>
+//                       <td>{sc.name}</td>
+//                       <td>
+//                         {categories.find((c) => c.id === sc.categoryId)?.name ||
+//                           "-"}
+//                       </td>
+//                       <td>
+//                         <button
+//                           className="btn btn-sm btn-danger"
+//                           onClick={() => handleDelete(sc.id, "subCategory")}
+//                         >
+//                           Delete
+//                         </button>
+//                       </td>
+//                     </tr>
+//                   ))}
+//                   {subCategories.length === 0 && (
+//                     <tr>
+//                       <td colSpan={3} className="text-center">
+//                         No subcategories
+//                       </td>
+//                     </tr>
+//                   )}
+//                 </tbody>
+//               </table>
+//             </div>
+//           )}
+
+//           {activeTab === "place" && (
+//             <div className="card p-3 shadow-sm">
+//               <form onSubmit={handleAddPlace} className="mb-3">
+//                 <input
+//                   type="text"
+//                   className="form-control mb-2"
+//                   placeholder="Place Name"
+//                   value={placeName}
+//                   onChange={(e) => setPlaceName(e.target.value)}
+//                   required
+//                 />
+//                 <select
+//                   className="form-select mb-2"
+//                   value={selectedCategoryForPlace}
+//                   onChange={(e) => setSelectedCategoryForPlace(e.target.value)}
+//                   required
+//                 >
+//                   <option value="">-- Select Category --</option>
+//                   {categories.map((c) => (
+//                     <option key={c.id} value={c.id}>
+//                       {c.name}
+//                     </option>
+//                   ))}
+//                 </select>
+//                 <select
+//                   className="form-select mb-2"
+//                   value={selectedSubCategoryForPlace}
+//                   onChange={(e) =>
+//                     setSelectedSubCategoryForPlace(e.target.value)
+//                   }
+//                 >
+//                   <option value="">-- Select SubCategory (Optional) --</option>
+//                   {subCategories
+//                     .filter((sc) => sc.categoryId === selectedCategoryForPlace)
+//                     .map((sc) => (
+//                       <option key={sc.id} value={sc.id}>
+//                         {sc.name}
+//                       </option>
+//                     ))}
+//                 </select>
+//                 <button className="btn btn-warning w-100">Add Place</button>
+//               </form>
+
+//               <table className="table table-bordered table-sm mb-0">
+//                 <thead>
+//                   <tr>
+//                     <th>Name</th>
+//                     <th>Category</th>
+//                     <th>SubCategory</th>
+//                     <th>Action</th>
+//                   </tr>
+//                 </thead>
+//                 <tbody>
+//                   {places.map((p) => (
+//                     <tr key={p.id}>
+//                       <td>{p.name}</td>
+//                       <td>
+//                         {categories.find((c) => c.id === p.categoryId)?.name ||
+//                           "-"}
+//                       </td>
+//                       <td>
+//                         {subCategories.find((sc) => sc.id === p.subCategoryId)
+//                           ?.name || "-"}
+//                       </td>
+//                       <td>
+//                         <button
+//                           className="btn btn-sm btn-danger"
+//                           onClick={() => handleDelete(p.id, "place")}
+//                         >
+//                           Delete
+//                         </button>
+//                       </td>
+//                     </tr>
+//                   ))}
+//                   {places.length === 0 && (
+//                     <tr>
+//                       <td colSpan={4} className="text-center">
+//                         No places
+//                       </td>
+//                     </tr>
+//                   )}
+//                 </tbody>
+//               </table>
+//             </div>
+//           )}
+//         </div>
+
+//         {/* Right Column: Expense Form & Table */}
+//         <div className="col-12 col-lg-8">
+//           <div className="card p-3 shadow-sm mb-4">
+//             <h5 className="card-title mb-3">Add Expense</h5>
+//             <form onSubmit={handleAddExpense}>
+//               <div className="row g-2">
+//                 <div className="col-12 col-sm-6">
+//                   <select
+//                     className="form-select"
+//                     name="category"
+//                     value={expenseForm.category}
+//                     onChange={handleExpenseChange}
+//                     required
+//                   >
+//                     <option value="">Select Category</option>
+//                     {categories.map((c) => (
+//                       <option key={c.id} value={c.id}>
+//                         {c.name}
+//                       </option>
+//                     ))}
+//                   </select>
+//                 </div>
+//                 <div className="col-12 col-sm-6">
+//                   <select
+//                     className="form-select"
+//                     name="subCategory"
+//                     value={expenseForm.subCategory}
+//                     onChange={handleExpenseChange}
+//                     required
+//                   >
+//                     <option value="">Select SubCategory</option>
+//                     {subCategories
+//                       .filter((sc) => sc.categoryId === expenseForm.category)
+//                       .map((sc) => (
+//                         <option key={sc.id} value={sc.id}>
+//                           {sc.name}
+//                         </option>
+//                       ))}
+//                   </select>
+//                 </div>
+//                 <div className="col-12 col-sm-6">
+//                   <select
+//                     className="form-select"
+//                     name="place"
+//                     value={expenseForm.place}
+//                     onChange={handleExpenseChange}
+//                   >
+//                     <option value="">Select Place</option>
+//                     {places
+//                       .filter((p) => p.categoryId === expenseForm.category)
+//                       .map((p) => (
+//                         <option key={p.id} value={p.id}>
+//                           {p.name}
+//                         </option>
+//                       ))}
+//                   </select>
+//                 </div>
+//                 <div className="col-12 col-sm-6">
+//                   <input
+//                     type="text"
+//                     name="store"
+//                     className="form-control"
+//                     placeholder="Store"
+//                     value={expenseForm.store}
+//                     onChange={handleExpenseChange}
+//                   />
+//                 </div>
+//                 <div className="col-12 col-sm-6">
+//                   <input
+//                     type="number"
+//                     name="amount"
+//                     className="form-control"
+//                     placeholder="Amount"
+//                     value={expenseForm.amount}
+//                     onChange={handleExpenseChange}
+//                     required
+//                   />
+//                 </div>
+//                 <div className="col-12 col-sm-6">
+//                   <input
+//                     type="text"
+//                     name="paidFor"
+//                     className="form-control"
+//                     placeholder="Paid For"
+//                     value={expenseForm.paidFor}
+//                     onChange={handleExpenseChange}
+//                   />
+//                 </div>
+//                 <div className="col-12">
+//                   <textarea
+//                     name="note"
+//                     className="form-control"
+//                     placeholder="Note"
+//                     value={expenseForm.note}
+//                     onChange={handleExpenseChange}
+//                   />
+//                 </div>
+//                 <div className="col-12">
+//                   <div className="form-check mb-2">
+//                     <input
+//                       type="checkbox"
+//                       name="isFixed"
+//                       className="form-check-input"
+//                       checked={expenseForm.isFixed}
+//                       onChange={handleExpenseChange}
+//                     />
+//                     <label className="form-check-label">Fixed Expense</label>
+//                   </div>
+//                 </div>
+//                 <div className="col-12">
+//                   <button className="btn btn-success w-100">Add Expense</button>
+//                 </div>
+//               </div>
+//             </form>
+//           </div>
+
+//           {/* Expense Table */}
+//           <div className="card p-3 shadow-sm">
+//             <h5 className="card-title mb-3">Expenses</h5>
+//             <div className="table-responsive">
+//               <table className="table table-bordered table-striped table-sm mb-0">
+//                 <thead>
+//                   <tr>
+//                     <th>Category</th>
+//                     <th>SubCategory</th>
+//                     <th>Place</th>
+//                     <th>Store</th>
+//                     <th>Amount</th>
+//                     <th>Paid For</th>
+//                     <th>Note</th>
+//                     <th>Fixed</th>
+//                     <th>Action</th>
+//                   </tr>
+//                 </thead>
+//                 <tbody>
+//                   {expenses.map((exp) => (
+//                     <tr key={exp.id}>
+//                       <td>
+//                         {categories.find((c) => c.id === exp.category)?.name ||
+//                           "-"}
+//                       </td>
+//                       <td>
+//                         {subCategories.find((sc) => sc.id === exp.subCategory)
+//                           ?.name || "-"}
+//                       </td>
+//                       <td>
+//                         {places.find((p) => p.id === exp.place)?.name || "-"}
+//                       </td>
+//                       <td>{exp.store}</td>
+//                       <td>{exp.amount}</td>
+//                       <td>{exp.paidFor}</td>
+//                       <td>{exp.note}</td>
+//                       <td>{exp.isFixed ? "Yes" : "No"}</td>
+//                       <td>
+//                         <button
+//                           className="btn btn-sm btn-danger"
+//                           onClick={() => handleDelete(exp.id, "expense")}
+//                         >
+//                           Delete
+//                         </button>
+//                       </td>
+//                     </tr>
+//                   ))}
+//                   {expenses.length === 0 && (
+//                     <tr>
+//                       <td colSpan={9} className="text-center">
+//                         No expenses
+//                       </td>
+//                     </tr>
+//                   )}
+//                 </tbody>
+//               </table>
+//             </div>
+//           </div>
+//         </div>
+//       </div>
+//     </div>
+//   );
+// }
+
+// import React, { useState } from "react";
+// import "bootstrap/dist/css/bootstrap.min.css";
+
+// export default function ExpenseManager() {
+//   const [formTab, setFormTab] = useState("category"); // Tabs for forms
+//   const [tableTab, setTableTab] = useState("category"); // Tabs for tables
+
+//   const [categories, setCategories] = useState([]);
+//   const [subCategories, setSubCategories] = useState([]);
+//   const [places, setPlaces] = useState([]);
+//   const [expenses, setExpenses] = useState([]);
+
+//   // States for forms...
+//   const [categoryName, setCategoryName] = useState("");
+//   const [subCategoryName, setSubCategoryName] = useState("");
+//   const [selectedCategory, setSelectedCategory] = useState("");
+//   const [placeName, setPlaceName] = useState("");
+//   const [selectedCategoryForPlace, setSelectedCategoryForPlace] = useState("");
+//   const [selectedSubCategoryForPlace, setSelectedSubCategoryForPlace] =
+//     useState("");
+//   const [expenseForm, setExpenseForm] = useState({
+//     category: "",
+//     subCategory: "",
+//     place: "",
+//     store: "",
+//     amount: "",
+//     paidFor: "",
+//     note: "",
+//     isFixed: false,
+//   });
+
+//   // Handlers...
+//   const handleAddCategory = (e) => {
+//     e.preventDefault();
+//     if (!categoryName) return;
+//     setCategories([...categories, { id: Date.now(), name: categoryName }]);
+//     setCategoryName("");
+//   };
+
+//   const handleAddSubCategory = (e) => {
+//     e.preventDefault();
+//     if (!subCategoryName || !selectedCategory) return;
+//     setSubCategories([
+//       ...subCategories,
+//       { id: Date.now(), name: subCategoryName, categoryId: selectedCategory },
+//     ]);
+//     setSubCategoryName("");
+//     setSelectedCategory("");
+//   };
+
+//   const handleAddPlace = (e) => {
+//     e.preventDefault();
+//     if (!placeName || !selectedCategoryForPlace) return;
+//     setPlaces([
+//       ...places,
+//       {
+//         id: Date.now(),
+//         name: placeName,
+//         categoryId: selectedCategoryForPlace,
+//         subCategoryId: selectedSubCategoryForPlace || null,
+//       },
+//     ]);
+//     setPlaceName("");
+//     setSelectedCategoryForPlace("");
+//     setSelectedSubCategoryForPlace("");
+//   };
+
+//   const handleAddExpense = (e) => {
+//     e.preventDefault();
+//     if (
+//       !expenseForm.category ||
+//       !expenseForm.subCategory ||
+//       !expenseForm.amount
+//     )
+//       return;
+//     setExpenses([...expenses, { ...expenseForm, id: Date.now() }]);
+//     setExpenseForm({
+//       category: "",
+//       subCategory: "",
+//       place: "",
+//       store: "",
+//       amount: "",
+//       paidFor: "",
+//       note: "",
+//       isFixed: false,
+//     });
+//   };
+
+//   const handleExpenseChange = (e) => {
+//     const { name, value, type, checked } = e.target;
+//     setExpenseForm({
+//       ...expenseForm,
+//       [name]: type === "checkbox" ? checked : value,
+//     });
+//   };
+
+//   const handleDelete = (id, type) => {
+//     if (type === "category")
+//       setCategories(categories.filter((c) => c.id !== id));
+//     if (type === "subCategory")
+//       setSubCategories(subCategories.filter((c) => c.id !== id));
+//     if (type === "place") setPlaces(places.filter((c) => c.id !== id));
+//     if (type === "expense") setExpenses(expenses.filter((c) => c.id !== id));
+//   };
+
+//   return (
+//     <div className="container my-4">
+//       <div className="row g-4">
+//         {/* Card 1: Forms */}
+//         <div className="col-12">
+//           <div className="card shadow-sm">
+//             <div className="card-header bg-primary text-white">Forms</div>
+//             <div className="card-body">
+//               <ul className="nav nav-tabs mb-3">
+//                 {["category", "subCategory", "place", "expense"].map((tab) => (
+//                   <li className="nav-item" key={tab}>
+//                     <button
+//                       className={`nav-link ${formTab === tab ? "active" : ""}`}
+//                       onClick={() => setFormTab(tab)}
+//                     >
+//                       {tab.charAt(0).toUpperCase() + tab.slice(1)}
+//                     </button>
+//                   </li>
+//                 ))}
+//               </ul>
+
+//               {/* Category Form */}
+//               {formTab === "category" && (
+//                 <form onSubmit={handleAddCategory}>
+//                   <input
+//                     type="text"
+//                     className="form-control mb-2"
+//                     placeholder="Category Name"
+//                     value={categoryName}
+//                     onChange={(e) => setCategoryName(e.target.value)}
+//                   />
+//                   <button className="btn btn-primary w-100">
+//                     Add Category
+//                   </button>
+//                 </form>
+//               )}
+
+//               {/* SubCategory Form */}
+//               {formTab === "subCategory" && (
+//                 <form onSubmit={handleAddSubCategory}>
+//                   <input
+//                     type="text"
+//                     className="form-control mb-2"
+//                     placeholder="SubCategory Name"
+//                     value={subCategoryName}
+//                     onChange={(e) => setSubCategoryName(e.target.value)}
+//                   />
+//                   <select
+//                     className="form-select mb-2"
+//                     value={selectedCategory}
+//                     onChange={(e) => setSelectedCategory(e.target.value)}
+//                   >
+//                     <option value="">-- Select Parent Category --</option>
+//                     {categories.map((c) => (
+//                       <option key={c.id} value={c.id}>
+//                         {c.name}
+//                       </option>
+//                     ))}
+//                   </select>
+//                   <button className="btn btn-primary w-100">
+//                     Add SubCategory
+//                   </button>
+//                 </form>
+//               )}
+
+//               {/* Place Form */}
+//               {formTab === "place" && (
+//                 <form onSubmit={handleAddPlace}>
+//                   <input
+//                     type="text"
+//                     className="form-control mb-2"
+//                     placeholder="Place Name"
+//                     value={placeName}
+//                     onChange={(e) => setPlaceName(e.target.value)}
+//                   />
+//                   <select
+//                     className="form-select mb-2"
+//                     value={selectedCategoryForPlace}
+//                     onChange={(e) =>
+//                       setSelectedCategoryForPlace(e.target.value)
+//                     }
+//                   >
+//                     <option value="">-- Select Category --</option>
+//                     {categories.map((c) => (
+//                       <option key={c.id} value={c.id}>
+//                         {c.name}
+//                       </option>
+//                     ))}
+//                   </select>
+//                   <select
+//                     className="form-select mb-2"
+//                     value={selectedSubCategoryForPlace}
+//                     onChange={(e) =>
+//                       setSelectedSubCategoryForPlace(e.target.value)
+//                     }
+//                   >
+//                     <option value="">
+//                       -- Select SubCategory (Optional) --
+//                     </option>
+//                     {subCategories
+//                       .filter(
+//                         (sc) => sc.categoryId === selectedCategoryForPlace
+//                       )
+//                       .map((sc) => (
+//                         <option key={sc.id} value={sc.id}>
+//                           {sc.name}
+//                         </option>
+//                       ))}
+//                   </select>
+//                   <button className="btn btn-warning w-100">Add Place</button>
+//                 </form>
+//               )}
+
+//               {/* Expense Form */}
+//               {formTab === "expense" && (
+//                 <form onSubmit={handleAddExpense}>
+//                   <div className="row g-2">
+//                     <div className="col-12 col-sm-6">
+//                       <select
+//                         className="form-select"
+//                         name="category"
+//                         value={expenseForm.category}
+//                         onChange={handleExpenseChange}
+//                         required
+//                       >
+//                         <option value="">Select Category</option>
+//                         {categories.map((c) => (
+//                           <option key={c.id} value={c.id}>
+//                             {c.name}
+//                           </option>
+//                         ))}
+//                       </select>
+//                     </div>
+//                     <div className="col-12 col-sm-6">
+//                       <select
+//                         className="form-select"
+//                         name="subCategory"
+//                         value={expenseForm.subCategory}
+//                         onChange={handleExpenseChange}
+//                         required
+//                       >
+//                         <option value="">Select SubCategory</option>
+//                         {subCategories
+//                           .filter(
+//                             (sc) => sc.categoryId === expenseForm.category
+//                           )
+//                           .map((sc) => (
+//                             <option key={sc.id} value={sc.id}>
+//                               {sc.name}
+//                             </option>
+//                           ))}
+//                       </select>
+//                     </div>
+//                     <div className="col-12 col-sm-6">
+//                       <select
+//                         className="form-select"
+//                         name="place"
+//                         value={expenseForm.place}
+//                         onChange={handleExpenseChange}
+//                       >
+//                         <option value="">Select Place</option>
+//                         {places
+//                           .filter((p) => p.categoryId === expenseForm.category)
+//                           .map((p) => (
+//                             <option key={p.id} value={p.id}>
+//                               {p.name}
+//                             </option>
+//                           ))}
+//                       </select>
+//                     </div>
+//                     <div className="col-12 col-sm-6">
+//                       <input
+//                         type="text"
+//                         name="store"
+//                         className="form-control"
+//                         placeholder="Store"
+//                         value={expenseForm.store}
+//                         onChange={handleExpenseChange}
+//                       />
+//                     </div>
+//                     <div className="col-12 col-sm-6">
+//                       <input
+//                         type="number"
+//                         name="amount"
+//                         className="form-control"
+//                         placeholder="Amount"
+//                         value={expenseForm.amount}
+//                         onChange={handleExpenseChange}
+//                         required
+//                       />
+//                     </div>
+//                     <div className="col-12 col-sm-6">
+//                       <input
+//                         type="text"
+//                         name="paidFor"
+//                         className="form-control"
+//                         placeholder="Paid For"
+//                         value={expenseForm.paidFor}
+//                         onChange={handleExpenseChange}
+//                       />
+//                     </div>
+//                     <div className="col-12">
+//                       <textarea
+//                         name="note"
+//                         className="form-control"
+//                         placeholder="Note"
+//                         value={expenseForm.note}
+//                         onChange={handleExpenseChange}
+//                       />
+//                     </div>
+//                     <div className="col-12">
+//                       <div className="form-check mb-2">
+//                         <input
+//                           type="checkbox"
+//                           name="isFixed"
+//                           className="form-check-input"
+//                           checked={expenseForm.isFixed}
+//                           onChange={handleExpenseChange}
+//                         />
+//                         <label className="form-check-label">
+//                           Fixed Expense
+//                         </label>
+//                       </div>
+//                     </div>
+//                     <div className="col-12">
+//                       <button className="btn btn-success w-100">
+//                         Add Expense
+//                       </button>
+//                     </div>
+//                   </div>
+//                 </form>
+//               )}
+//             </div>
+//           </div>
+//         </div>
+
+//         {/* Card 2: Tables */}
+//         <div className="col-12">
+//           <div className="card shadow-sm">
+//             <div className="card-header bg-info text-white">Tables</div>
+//             <div className="card-body">
+//               <ul className="nav nav-tabs mb-3">
+//                 {["category", "subCategory", "place", "expense"].map((tab) => (
+//                   <li className="nav-item" key={tab}>
+//                     <button
+//                       className={`nav-link ${tableTab === tab ? "active" : ""}`}
+//                       onClick={() => setTableTab(tab)}
+//                     >
+//                       {tab.charAt(0).toUpperCase() + tab.slice(1)} Table
+//                     </button>
+//                   </li>
+//                 ))}
+//               </ul>
+
+//               {/* Category Table */}
+//               {tableTab === "category" && (
+//                 <table className="table table-bordered table-sm">
+//                   <thead>
+//                     <tr>
+//                       <th>Name</th>
+//                       <th>Action</th>
+//                     </tr>
+//                   </thead>
+//                   <tbody>
+//                     {categories.map((cat) => (
+//                       <tr key={cat.id}>
+//                         <td>{cat.name}</td>
+//                         <td>
+//                           <button
+//                             className="btn btn-sm btn-danger"
+//                             onClick={() => handleDelete(cat.id, "category")}
+//                           >
+//                             Delete
+//                           </button>
+//                         </td>
+//                       </tr>
+//                     ))}
+//                     {categories.length === 0 && (
+//                       <tr>
+//                         <td colSpan={2} className="text-center">
+//                           No categories
+//                         </td>
+//                       </tr>
+//                     )}
+//                   </tbody>
+//                 </table>
+//               )}
+
+//               {/* SubCategory Table */}
+//               {tableTab === "subCategory" && (
+//                 <table className="table table-bordered table-sm">
+//                   <thead>
+//                     <tr>
+//                       <th>Name</th>
+//                       <th>Category</th>
+//                       <th>Action</th>
+//                     </tr>
+//                   </thead>
+//                   <tbody>
+//                     {subCategories.map((sc) => (
+//                       <tr key={sc.id}>
+//                         <td>{sc.name}</td>
+//                         <td>
+//                           {categories.find((c) => c.id === sc.categoryId)
+//                             ?.name || "-"}
+//                         </td>
+//                         <td>
+//                           <button
+//                             className="btn btn-sm btn-danger"
+//                             onClick={() => handleDelete(sc.id, "subCategory")}
+//                           >
+//                             Delete
+//                           </button>
+//                         </td>
+//                       </tr>
+//                     ))}
+//                     {subCategories.length === 0 && (
+//                       <tr>
+//                         <td colSpan={3} className="text-center">
+//                           No subcategories
+//                         </td>
+//                       </tr>
+//                     )}
+//                   </tbody>
+//                 </table>
+//               )}
+
+//               {/* Place Table */}
+//               {tableTab === "place" && (
+//                 <table className="table table-bordered table-sm">
+//                   <thead>
+//                     <tr>
+//                       <th>Name</th>
+//                       <th>Category</th>
+//                       <th>SubCategory</th>
+//                       <th>Action</th>
+//                     </tr>
+//                   </thead>
+//                   <tbody>
+//                     {places.map((p) => (
+//                       <tr key={p.id}>
+//                         <td>{p.name}</td>
+//                         <td>
+//                           {categories.find((c) => c.id === p.categoryId)
+//                             ?.name || "-"}
+//                         </td>
+//                         <td>
+//                           {subCategories.find((sc) => sc.id === p.subCategoryId)
+//                             ?.name || "-"}
+//                         </td>
+//                         <td>
+//                           <button
+//                             className="btn btn-sm btn-danger"
+//                             onClick={() => handleDelete(p.id, "place")}
+//                           >
+//                             Delete
+//                           </button>
+//                         </td>
+//                       </tr>
+//                     ))}
+//                     {places.length === 0 && (
+//                       <tr>
+//                         <td colSpan={4} className="text-center">
+//                           No places
+//                         </td>
+//                       </tr>
+//                     )}
+//                   </tbody>
+//                 </table>
+//               )}
+
+//               {/* Expense Table */}
+//               {tableTab === "expense" && (
+//                 <table className="table table-bordered table-sm">
+//                   <thead>
+//                     <tr>
+//                       <th>Category</th>
+//                       <th>SubCategory</th>
+//                       <th>Place</th>
+//                       <th>Store</th>
+//                       <th>Amount</th>
+//                       <th>Paid For</th>
+//                       <th>Note</th>
+//                       <th>Fixed</th>
+//                       <th>Action</th>
+//                     </tr>
+//                   </thead>
+//                   <tbody>
+//                     {expenses.map((exp) => (
+//                       <tr key={exp.id}>
+//                         <td>
+//                           {categories.find((c) => c.id === exp.category)
+//                             ?.name || "-"}
+//                         </td>
+//                         <td>
+//                           {subCategories.find((sc) => sc.id === exp.subCategory)
+//                             ?.name || "-"}
+//                         </td>
+//                         <td>
+//                           {places.find((p) => p.id === exp.place)?.name || "-"}
+//                         </td>
+//                         <td>{exp.store}</td>
+//                         <td>{exp.amount}</td>
+//                         <td>{exp.paidFor}</td>
+//                         <td>{exp.note}</td>
+//                         <td>{exp.isFixed ? "Yes" : "No"}</td>
+//                         <td>
+//                           <button
+//                             className="btn btn-sm btn-danger"
+//                             onClick={() => handleDelete(exp.id, "expense")}
+//                           >
+//                             Delete
+//                           </button>
+//                         </td>
+//                       </tr>
+//                     ))}
+//                     {expenses.length === 0 && (
+//                       <tr>
+//                         <td colSpan={9} className="text-center">
+//                           No expenses
+//                         </td>
+//                       </tr>
+//                     )}
+//                   </tbody>
+//                 </table>
+//               )}
+//             </div>
+//           </div>
+//         </div>
+//       </div>
+//     </div>
+//   );
+// }
+// -----------------------------------------------------
+
+import React, { useState, useEffect } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
+import axios from "axios";
 
 export default function ExpenseManager() {
-  const [activeTab, setActiveTab] = useState("category");
+  const [formTab, setFormTab] = useState("category");
+  const [tableTab, setTableTab] = useState("category");
 
   const [categories, setCategories] = useState([]);
   const [subCategories, setSubCategories] = useState([]);
   const [places, setPlaces] = useState([]);
   const [expenses, setExpenses] = useState([]);
 
+  // Form states
   const [categoryName, setCategoryName] = useState("");
   const [subCategoryName, setSubCategoryName] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("");
@@ -1333,7 +2397,6 @@ export default function ExpenseManager() {
   const [selectedCategoryForPlace, setSelectedCategoryForPlace] = useState("");
   const [selectedSubCategoryForPlace, setSelectedSubCategoryForPlace] =
     useState("");
-
   const [expenseForm, setExpenseForm] = useState({
     category: "",
     subCategory: "",
@@ -1345,43 +2408,81 @@ export default function ExpenseManager() {
     isFixed: false,
   });
 
-  // Handlers
-  const handleAddCategory = (e) => {
+  const API_BASE = "http://localhost:5000/api"; // 🔹 change to your API base
+
+  // Load initial data
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  const fetchData = async () => {
+    try {
+      const [catRes, subRes, placeRes, expRes] = await Promise.all([
+        axios.get(`${API_BASE}/categories`),
+        axios.get(`${API_BASE}/subcategories`),
+        axios.get(`${API_BASE}/places`),
+        axios.get(`${API_BASE}/expenses`),
+      ]);
+      setCategories(catRes.data);
+      setSubCategories(subRes.data);
+      setPlaces(placeRes.data);
+      setExpenses(expRes.data);
+    } catch (err) {
+      console.error("Error fetching data", err);
+    }
+  };
+
+  // ------- Handlers with API calls -------
+
+  const handleAddCategory = async (e) => {
     e.preventDefault();
     if (!categoryName) return;
-    setCategories([...categories, { id: Date.now(), name: categoryName }]);
-    setCategoryName("");
+    try {
+      const res = await axios.post(`${API_BASE}/categories`, {
+        name: categoryName,
+      });
+      setCategories([...categories, res.data]);
+      setCategoryName("");
+    } catch (err) {
+      console.error("Error adding category", err);
+    }
   };
 
-  const handleAddSubCategory = (e) => {
+  const handleAddSubCategory = async (e) => {
     e.preventDefault();
     if (!subCategoryName || !selectedCategory) return;
-    setSubCategories([
-      ...subCategories,
-      { id: Date.now(), name: subCategoryName, categoryId: selectedCategory },
-    ]);
-    setSubCategoryName("");
-    setSelectedCategory("");
+    try {
+      const res = await axios.post(`${API_BASE}/subcategories`, {
+        name: subCategoryName,
+        categoryId: selectedCategory,
+      });
+      setSubCategories([...subCategories, res.data]);
+      setSubCategoryName("");
+      setSelectedCategory("");
+    } catch (err) {
+      console.error("Error adding subcategory", err);
+    }
   };
 
-  const handleAddPlace = (e) => {
+  const handleAddPlace = async (e) => {
     e.preventDefault();
     if (!placeName || !selectedCategoryForPlace) return;
-    setPlaces([
-      ...places,
-      {
-        id: Date.now(),
+    try {
+      const res = await axios.post(`${API_BASE}/places`, {
         name: placeName,
         categoryId: selectedCategoryForPlace,
         subCategoryId: selectedSubCategoryForPlace || null,
-      },
-    ]);
-    setPlaceName("");
-    setSelectedCategoryForPlace("");
-    setSelectedSubCategoryForPlace("");
+      });
+      setPlaces([...places, res.data]);
+      setPlaceName("");
+      setSelectedCategoryForPlace("");
+      setSelectedSubCategoryForPlace("");
+    } catch (err) {
+      console.error("Error adding place", err);
+    }
   };
 
-  const handleAddExpense = (e) => {
+  const handleAddExpense = async (e) => {
     e.preventDefault();
     if (
       !expenseForm.category ||
@@ -1389,17 +2490,22 @@ export default function ExpenseManager() {
       !expenseForm.amount
     )
       return;
-    setExpenses([...expenses, { ...expenseForm, id: Date.now() }]);
-    setExpenseForm({
-      category: "",
-      subCategory: "",
-      place: "",
-      store: "",
-      amount: "",
-      paidFor: "",
-      note: "",
-      isFixed: false,
-    });
+    try {
+      const res = await axios.post(`${API_BASE}/expenses`, expenseForm);
+      setExpenses([...expenses, res.data]);
+      setExpenseForm({
+        category: "",
+        subCategory: "",
+        place: "",
+        store: "",
+        amount: "",
+        paidFor: "",
+        note: "",
+        isFixed: false,
+      });
+    } catch (err) {
+      console.error("Error adding expense", err);
+    }
   };
 
   const handleExpenseChange = (e) => {
@@ -1410,423 +2516,446 @@ export default function ExpenseManager() {
     });
   };
 
-  const handleDelete = (id, type) => {
-    if (type === "category")
-      setCategories(categories.filter((c) => c.id !== id));
-    if (type === "subCategory")
-      setSubCategories(subCategories.filter((c) => c.id !== id));
-    if (type === "place") setPlaces(places.filter((c) => c.id !== id));
-    if (type === "expense") setExpenses(expenses.filter((c) => c.id !== id));
+  const handleDelete = async (id, type) => {
+    try {
+      await axios.delete(`${API_BASE}/${type}s/${id}`); // assumes plural API routes
+      if (type === "category")
+        setCategories(categories.filter((c) => c.id !== id));
+      if (type === "subCategory")
+        setSubCategories(subCategories.filter((c) => c.id !== id));
+      if (type === "place") setPlaces(places.filter((c) => c.id !== id));
+      if (type === "expense") setExpenses(expenses.filter((c) => c.id !== id));
+    } catch (err) {
+      console.error(`Error deleting ${type}`, err);
+    }
   };
 
   return (
     <div className="container my-4">
-      <div className="row">
-        {/* Left Column: Category / SubCategory / Place */}
-        <div className="col-12 col-lg-4 mb-4">
-          <ul className="nav nav-tabs mb-3" role="tablist">
-            <li className="nav-item">
-              <button
-                className={`nav-link ${
-                  activeTab === "category" ? "active" : ""
-                }`}
-                onClick={() => setActiveTab("category")}
-              >
-                Category
-              </button>
-            </li>
-            <li className="nav-item">
-              <button
-                className={`nav-link ${
-                  activeTab === "subCategory" ? "active" : ""
-                }`}
-                onClick={() => setActiveTab("subCategory")}
-              >
-                SubCategory
-              </button>
-            </li>
-            <li className="nav-item">
-              <button
-                className={`nav-link ${activeTab === "place" ? "active" : ""}`}
-                onClick={() => setActiveTab("place")}
-              >
-                Place
-              </button>
-            </li>
-          </ul>
+      <div className="row g-4">
+        {/* Card 1: Forms */}
+        <div className="col-12">
+          <div className="card shadow-sm">
+            <div className="card-header bg-primary text-white">Forms</div>
+            <div className="card-body">
+              <ul className="nav nav-tabs mb-3">
+                {["category", "subCategory", "place", "expense"].map((tab) => (
+                  <li className="nav-item" key={tab}>
+                    <button
+                      className={`nav-link ${formTab === tab ? "active" : ""}`}
+                      onClick={() => setFormTab(tab)}
+                    >
+                      {tab.charAt(0).toUpperCase() + tab.slice(1)}
+                    </button>
+                  </li>
+                ))}
+              </ul>
 
-          {/* Tab Content */}
-          {activeTab === "category" && (
-            <div className="card p-3 shadow-sm">
-              <form onSubmit={handleAddCategory} className="mb-3">
-                <input
-                  type="text"
-                  className="form-control mb-2"
-                  placeholder="Category Name"
-                  value={categoryName}
-                  onChange={(e) => setCategoryName(e.target.value)}
-                />
-                <button className="btn btn-primary w-100">Add Category</button>
-              </form>
+              {/* Category Form */}
+              {formTab === "category" && (
+                <form onSubmit={handleAddCategory}>
+                  <input
+                    type="text"
+                    className="form-control mb-2"
+                    placeholder="Category Name"
+                    value={categoryName}
+                    onChange={(e) => setCategoryName(e.target.value)}
+                  />
+                  <button className="btn btn-primary w-100">
+                    Add Category
+                  </button>
+                </form>
+              )}
 
-              <table className="table table-bordered table-sm mb-0">
-                <thead>
-                  <tr>
-                    <th>Name</th>
-                    <th>Action</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {categories.map((cat) => (
-                    <tr key={cat.id}>
-                      <td>{cat.name}</td>
-                      <td>
-                        <button
-                          className="btn btn-sm btn-danger"
-                          onClick={() => handleDelete(cat.id, "category")}
-                        >
-                          Delete
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                  {categories.length === 0 && (
-                    <tr>
-                      <td colSpan={2} className="text-center">
-                        No categories
-                      </td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
-            </div>
-          )}
-
-          {activeTab === "subCategory" && (
-            <div className="card p-3 shadow-sm">
-              <form onSubmit={handleAddSubCategory} className="mb-3">
-                <input
-                  type="text"
-                  className="form-control mb-2"
-                  placeholder="SubCategory Name"
-                  value={subCategoryName}
-                  onChange={(e) => setSubCategoryName(e.target.value)}
-                />
-                <select
-                  className="form-select mb-2"
-                  value={selectedCategory}
-                  onChange={(e) => setSelectedCategory(e.target.value)}
-                  required
-                >
-                  <option value="">-- Select Parent Category --</option>
-                  {categories.map((c) => (
-                    <option key={c.id} value={c.id}>
-                      {c.name}
-                    </option>
-                  ))}
-                </select>
-                <button className="btn btn-primary w-100">
-                  Add SubCategory
-                </button>
-              </form>
-
-              <table className="table table-bordered table-sm mb-0">
-                <thead>
-                  <tr>
-                    <th>Name</th>
-                    <th>Category</th>
-                    <th>Action</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {subCategories.map((sc) => (
-                    <tr key={sc.id}>
-                      <td>{sc.name}</td>
-                      <td>
-                        {categories.find((c) => c.id === sc.categoryId)?.name ||
-                          "-"}
-                      </td>
-                      <td>
-                        <button
-                          className="btn btn-sm btn-danger"
-                          onClick={() => handleDelete(sc.id, "subCategory")}
-                        >
-                          Delete
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                  {subCategories.length === 0 && (
-                    <tr>
-                      <td colSpan={3} className="text-center">
-                        No subcategories
-                      </td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
-            </div>
-          )}
-
-          {activeTab === "place" && (
-            <div className="card p-3 shadow-sm">
-              <form onSubmit={handleAddPlace} className="mb-3">
-                <input
-                  type="text"
-                  className="form-control mb-2"
-                  placeholder="Place Name"
-                  value={placeName}
-                  onChange={(e) => setPlaceName(e.target.value)}
-                  required
-                />
-                <select
-                  className="form-select mb-2"
-                  value={selectedCategoryForPlace}
-                  onChange={(e) => setSelectedCategoryForPlace(e.target.value)}
-                  required
-                >
-                  <option value="">-- Select Category --</option>
-                  {categories.map((c) => (
-                    <option key={c.id} value={c.id}>
-                      {c.name}
-                    </option>
-                  ))}
-                </select>
-                <select
-                  className="form-select mb-2"
-                  value={selectedSubCategoryForPlace}
-                  onChange={(e) =>
-                    setSelectedSubCategoryForPlace(e.target.value)
-                  }
-                >
-                  <option value="">-- Select SubCategory (Optional) --</option>
-                  {subCategories
-                    .filter((sc) => sc.categoryId === selectedCategoryForPlace)
-                    .map((sc) => (
-                      <option key={sc.id} value={sc.id}>
-                        {sc.name}
-                      </option>
-                    ))}
-                </select>
-                <button className="btn btn-warning w-100">Add Place</button>
-              </form>
-
-              <table className="table table-bordered table-sm mb-0">
-                <thead>
-                  <tr>
-                    <th>Name</th>
-                    <th>Category</th>
-                    <th>SubCategory</th>
-                    <th>Action</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {places.map((p) => (
-                    <tr key={p.id}>
-                      <td>{p.name}</td>
-                      <td>
-                        {categories.find((c) => c.id === p.categoryId)?.name ||
-                          "-"}
-                      </td>
-                      <td>
-                        {subCategories.find((sc) => sc.id === p.subCategoryId)
-                          ?.name || "-"}
-                      </td>
-                      <td>
-                        <button
-                          className="btn btn-sm btn-danger"
-                          onClick={() => handleDelete(p.id, "place")}
-                        >
-                          Delete
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                  {places.length === 0 && (
-                    <tr>
-                      <td colSpan={4} className="text-center">
-                        No places
-                      </td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
-            </div>
-          )}
-        </div>
-
-        {/* Right Column: Expense Form & Table */}
-        <div className="col-12 col-lg-8">
-          <div className="card p-3 shadow-sm mb-4">
-            <h5 className="card-title mb-3">Add Expense</h5>
-            <form onSubmit={handleAddExpense}>
-              <div className="row g-2">
-                <div className="col-12 col-sm-6">
+              {/* SubCategory Form */}
+              {formTab === "subCategory" && (
+                <form onSubmit={handleAddSubCategory}>
+                  <input
+                    type="text"
+                    className="form-control mb-2"
+                    placeholder="SubCategory Name"
+                    value={subCategoryName}
+                    onChange={(e) => setSubCategoryName(e.target.value)}
+                  />
                   <select
-                    className="form-select"
-                    name="category"
-                    value={expenseForm.category}
-                    onChange={handleExpenseChange}
-                    required
+                    className="form-select mb-2"
+                    value={selectedCategory}
+                    onChange={(e) => setSelectedCategory(e.target.value)}
                   >
-                    <option value="">Select Category</option>
+                    <option value="">-- Select Parent Category --</option>
                     {categories.map((c) => (
                       <option key={c.id} value={c.id}>
                         {c.name}
                       </option>
                     ))}
                   </select>
-                </div>
-                <div className="col-12 col-sm-6">
+                  <button className="btn btn-primary w-100">
+                    Add SubCategory
+                  </button>
+                </form>
+              )}
+
+              {/* Place Form */}
+              {formTab === "place" && (
+                <form onSubmit={handleAddPlace}>
+                  <input
+                    type="text"
+                    className="form-control mb-2"
+                    placeholder="Place Name"
+                    value={placeName}
+                    onChange={(e) => setPlaceName(e.target.value)}
+                  />
                   <select
-                    className="form-select"
-                    name="subCategory"
-                    value={expenseForm.subCategory}
-                    onChange={handleExpenseChange}
-                    required
+                    className="form-select mb-2"
+                    value={selectedCategoryForPlace}
+                    onChange={(e) =>
+                      setSelectedCategoryForPlace(e.target.value)
+                    }
                   >
-                    <option value="">Select SubCategory</option>
+                    <option value="">-- Select Category --</option>
+                    {categories.map((c) => (
+                      <option key={c.id} value={c.id}>
+                        {c.name}
+                      </option>
+                    ))}
+                  </select>
+                  <select
+                    className="form-select mb-2"
+                    value={selectedSubCategoryForPlace}
+                    onChange={(e) =>
+                      setSelectedSubCategoryForPlace(e.target.value)
+                    }
+                  >
+                    <option value="">
+                      -- Select SubCategory (Optional) --
+                    </option>
                     {subCategories
-                      .filter((sc) => sc.categoryId === expenseForm.category)
+                      .filter(
+                        (sc) => sc.categoryId === selectedCategoryForPlace
+                      )
                       .map((sc) => (
                         <option key={sc.id} value={sc.id}>
                           {sc.name}
                         </option>
                       ))}
                   </select>
-                </div>
-                <div className="col-12 col-sm-6">
-                  <select
-                    className="form-select"
-                    name="place"
-                    value={expenseForm.place}
-                    onChange={handleExpenseChange}
-                  >
-                    <option value="">Select Place</option>
-                    {places
-                      .filter((p) => p.categoryId === expenseForm.category)
-                      .map((p) => (
-                        <option key={p.id} value={p.id}>
-                          {p.name}
-                        </option>
-                      ))}
-                  </select>
-                </div>
-                <div className="col-12 col-sm-6">
-                  <input
-                    type="text"
-                    name="store"
-                    className="form-control"
-                    placeholder="Store"
-                    value={expenseForm.store}
-                    onChange={handleExpenseChange}
-                  />
-                </div>
-                <div className="col-12 col-sm-6">
-                  <input
-                    type="number"
-                    name="amount"
-                    className="form-control"
-                    placeholder="Amount"
-                    value={expenseForm.amount}
-                    onChange={handleExpenseChange}
-                    required
-                  />
-                </div>
-                <div className="col-12 col-sm-6">
-                  <input
-                    type="text"
-                    name="paidFor"
-                    className="form-control"
-                    placeholder="Paid For"
-                    value={expenseForm.paidFor}
-                    onChange={handleExpenseChange}
-                  />
-                </div>
-                <div className="col-12">
-                  <textarea
-                    name="note"
-                    className="form-control"
-                    placeholder="Note"
-                    value={expenseForm.note}
-                    onChange={handleExpenseChange}
-                  />
-                </div>
-                <div className="col-12">
-                  <div className="form-check mb-2">
-                    <input
-                      type="checkbox"
-                      name="isFixed"
-                      className="form-check-input"
-                      checked={expenseForm.isFixed}
-                      onChange={handleExpenseChange}
-                    />
-                    <label className="form-check-label">Fixed Expense</label>
-                  </div>
-                </div>
-                <div className="col-12">
-                  <button className="btn btn-success w-100">Add Expense</button>
-                </div>
-              </div>
-            </form>
-          </div>
+                  <button className="btn btn-warning w-100">Add Place</button>
+                </form>
+              )}
 
-          {/* Expense Table */}
-          <div className="card p-3 shadow-sm">
-            <h5 className="card-title mb-3">Expenses</h5>
-            <div className="table-responsive">
-              <table className="table table-bordered table-striped table-sm mb-0">
-                <thead>
-                  <tr>
-                    <th>Category</th>
-                    <th>SubCategory</th>
-                    <th>Place</th>
-                    <th>Store</th>
-                    <th>Amount</th>
-                    <th>Paid For</th>
-                    <th>Note</th>
-                    <th>Fixed</th>
-                    <th>Action</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {expenses.map((exp) => (
-                    <tr key={exp.id}>
-                      <td>
-                        {categories.find((c) => c.id === exp.category)?.name ||
-                          "-"}
-                      </td>
-                      <td>
-                        {subCategories.find((sc) => sc.id === exp.subCategory)
-                          ?.name || "-"}
-                      </td>
-                      <td>
-                        {places.find((p) => p.id === exp.place)?.name || "-"}
-                      </td>
-                      <td>{exp.store}</td>
-                      <td>{exp.amount}</td>
-                      <td>{exp.paidFor}</td>
-                      <td>{exp.note}</td>
-                      <td>{exp.isFixed ? "Yes" : "No"}</td>
-                      <td>
-                        <button
-                          className="btn btn-sm btn-danger"
-                          onClick={() => handleDelete(exp.id, "expense")}
-                        >
-                          Delete
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                  {expenses.length === 0 && (
+              {/* Expense Form */}
+              {formTab === "expense" && (
+                <form onSubmit={handleAddExpense}>
+                  <div className="row g-2">
+                    <div className="col-12 col-sm-6">
+                      <select
+                        className="form-select"
+                        name="category"
+                        value={expenseForm.category}
+                        onChange={handleExpenseChange}
+                        required
+                      >
+                        <option value="">Select Category</option>
+                        {categories.map((c) => (
+                          <option key={c.id} value={c.id}>
+                            {c.name}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                    <div className="col-12 col-sm-6">
+                      <select
+                        className="form-select"
+                        name="subCategory"
+                        value={expenseForm.subCategory}
+                        onChange={handleExpenseChange}
+                        required
+                      >
+                        <option value="">Select SubCategory</option>
+                        {subCategories
+                          .filter(
+                            (sc) => sc.categoryId === expenseForm.category
+                          )
+                          .map((sc) => (
+                            <option key={sc.id} value={sc.id}>
+                              {sc.name}
+                            </option>
+                          ))}
+                      </select>
+                    </div>
+                    <div className="col-12 col-sm-6">
+                      <select
+                        className="form-select"
+                        name="place"
+                        value={expenseForm.place}
+                        onChange={handleExpenseChange}
+                      >
+                        <option value="">Select Place</option>
+                        {places
+                          .filter((p) => p.categoryId === expenseForm.category)
+                          .map((p) => (
+                            <option key={p.id} value={p.id}>
+                              {p.name}
+                            </option>
+                          ))}
+                      </select>
+                    </div>
+                    <div className="col-12 col-sm-6">
+                      <input
+                        type="text"
+                        name="store"
+                        className="form-control"
+                        placeholder="Store"
+                        value={expenseForm.store}
+                        onChange={handleExpenseChange}
+                      />
+                    </div>
+                    <div className="col-12 col-sm-6">
+                      <input
+                        type="number"
+                        name="amount"
+                        className="form-control"
+                        placeholder="Amount"
+                        value={expenseForm.amount}
+                        onChange={handleExpenseChange}
+                        required
+                      />
+                    </div>
+                    <div className="col-12 col-sm-6">
+                      <input
+                        type="text"
+                        name="paidFor"
+                        className="form-control"
+                        placeholder="Paid For"
+                        value={expenseForm.paidFor}
+                        onChange={handleExpenseChange}
+                      />
+                    </div>
+                    <div className="col-12">
+                      <textarea
+                        name="note"
+                        className="form-control"
+                        placeholder="Note"
+                        value={expenseForm.note}
+                        onChange={handleExpenseChange}
+                      />
+                    </div>
+                    <div className="col-12">
+                      <div className="form-check mb-2">
+                        <input
+                          type="checkbox"
+                          name="isFixed"
+                          className="form-check-input"
+                          checked={expenseForm.isFixed}
+                          onChange={handleExpenseChange}
+                        />
+                        <label className="form-check-label">
+                          Fixed Expense
+                        </label>
+                      </div>
+                    </div>
+                    <div className="col-12">
+                      <button className="btn btn-success w-100">
+                        Add Expense
+                      </button>
+                    </div>
+                  </div>
+                </form>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Card 2: Tables */}
+        <div className="col-12">
+          <div className="card shadow-sm">
+            <div className="card-header bg-info text-white">Tables</div>
+            <div className="card-body">
+              <ul className="nav nav-tabs mb-3">
+                {["category", "subCategory", "place", "expense"].map((tab) => (
+                  <li className="nav-item" key={tab}>
+                    <button
+                      className={`nav-link ${tableTab === tab ? "active" : ""}`}
+                      onClick={() => setTableTab(tab)}
+                    >
+                      {tab.charAt(0).toUpperCase() + tab.slice(1)} Table
+                    </button>
+                  </li>
+                ))}
+              </ul>
+
+              {/* Category Table */}
+              {tableTab === "category" && (
+                <table className="table table-bordered table-sm">
+                  <thead>
                     <tr>
-                      <td colSpan={9} className="text-center">
-                        No expenses
-                      </td>
+                      <th>Name</th>
+                      <th>Action</th>
                     </tr>
-                  )}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody>
+                    {categories.map((cat) => (
+                      <tr key={cat.id}>
+                        <td>{cat.name}</td>
+                        <td>
+                          <button
+                            className="btn btn-sm btn-danger"
+                            onClick={() => handleDelete(cat.id, "category")}
+                          >
+                            Delete
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                    {categories.length === 0 && (
+                      <tr>
+                        <td colSpan={2} className="text-center">
+                          No categories
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              )}
+
+              {/* SubCategory Table */}
+              {tableTab === "subCategory" && (
+                <table className="table table-bordered table-sm">
+                  <thead>
+                    <tr>
+                      <th>Name</th>
+                      <th>Category</th>
+                      <th>Action</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {subCategories.map((sc) => (
+                      <tr key={sc.id}>
+                        <td>{sc.name}</td>
+                        <td>
+                          {categories.find((c) => c.id === sc.categoryId)
+                            ?.name || "-"}
+                        </td>
+                        <td>
+                          <button
+                            className="btn btn-sm btn-danger"
+                            onClick={() => handleDelete(sc.id, "subCategory")}
+                          >
+                            Delete
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                    {subCategories.length === 0 && (
+                      <tr>
+                        <td colSpan={3} className="text-center">
+                          No subcategories
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              )}
+
+              {/* Place Table */}
+              {tableTab === "place" && (
+                <table className="table table-bordered table-sm">
+                  <thead>
+                    <tr>
+                      <th>Name</th>
+                      <th>Category</th>
+                      <th>SubCategory</th>
+                      <th>Action</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {places.map((p) => (
+                      <tr key={p.id}>
+                        <td>{p.name}</td>
+                        <td>
+                          {categories.find((c) => c.id === p.categoryId)
+                            ?.name || "-"}
+                        </td>
+                        <td>
+                          {subCategories.find((sc) => sc.id === p.subCategoryId)
+                            ?.name || "-"}
+                        </td>
+                        <td>
+                          <button
+                            className="btn btn-sm btn-danger"
+                            onClick={() => handleDelete(p.id, "place")}
+                          >
+                            Delete
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                    {places.length === 0 && (
+                      <tr>
+                        <td colSpan={4} className="text-center">
+                          No places
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              )}
+
+              {/* Expense Table */}
+              {tableTab === "expense" && (
+                <table className="table table-bordered table-sm">
+                  <thead>
+                    <tr>
+                      <th>Category</th>
+                      <th>SubCategory</th>
+                      <th>Place</th>
+                      <th>Store</th>
+                      <th>Amount</th>
+                      <th>Paid For</th>
+                      <th>Note</th>
+                      <th>Fixed</th>
+                      <th>Action</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {expenses.map((exp) => (
+                      <tr key={exp.id}>
+                        <td>
+                          {categories.find((c) => c.id === exp.category)
+                            ?.name || "-"}
+                        </td>
+                        <td>
+                          {subCategories.find((sc) => sc.id === exp.subCategory)
+                            ?.name || "-"}
+                        </td>
+                        <td>
+                          {places.find((p) => p.id === exp.place)?.name || "-"}
+                        </td>
+                        <td>{exp.store}</td>
+                        <td>{exp.amount}</td>
+                        <td>{exp.paidFor}</td>
+                        <td>{exp.note}</td>
+                        <td>{exp.isFixed ? "Yes" : "No"}</td>
+                        <td>
+                          <button
+                            className="btn btn-sm btn-danger"
+                            onClick={() => handleDelete(exp.id, "expense")}
+                          >
+                            Delete
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                    {expenses.length === 0 && (
+                      <tr>
+                        <td colSpan={9} className="text-center">
+                          No expenses
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              )}
             </div>
           </div>
         </div>
