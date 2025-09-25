@@ -2378,7 +2378,21 @@
 
 import React, { useState, useEffect } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
-import axios from "axios";
+import { jwtDecode } from "jwt-decode";
+import {
+  getCategories,
+  getSubCategories,
+  getPlaces,
+  getExpenses,
+  createCategory,
+  createSubCategory,
+  createPlace,
+  createExpense,
+  deleteCategory,
+  deleteSubCategory,
+  deletePlace,
+  deleteExpense,
+} from "../services/api";
 
 export default function ExpenseManager() {
   const [formTab, setFormTab] = useState("category");
@@ -2389,7 +2403,6 @@ export default function ExpenseManager() {
   const [places, setPlaces] = useState([]);
   const [expenses, setExpenses] = useState([]);
 
-  // Form states
   const [categoryName, setCategoryName] = useState("");
   const [subCategoryName, setSubCategoryName] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("");
@@ -2408,77 +2421,129 @@ export default function ExpenseManager() {
     isFixed: false,
   });
 
-  const API_BASE = "http://localhost:5000/api"; // 🔹 change to your API base
+  const [userId, setUserId] = useState(null);
 
-  // Load initial data
+  // Decode JWT to get userId
   useEffect(() => {
-    fetchData();
+    const token = localStorage.getItem("token");
+    if (!token) return;
+
+    try {
+      const decoded = jwtDecode(token);
+      const id =
+        decoded[
+          "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier"
+        ] ||
+        decoded.sub ||
+        null;
+      setUserId(id);
+    } catch (err) {
+      console.error("Invalid token", err);
+    }
   }, []);
+
+  useEffect(() => {
+    if (!userId) return; // wait for userId
+    fetchData();
+  }, [userId]);
 
   const fetchData = async () => {
     try {
       const [catRes, subRes, placeRes, expRes] = await Promise.all([
-        axios.get(`${API_BASE}/categories`),
-        axios.get(`${API_BASE}/subcategories`),
-        axios.get(`${API_BASE}/places`),
-        axios.get(`${API_BASE}/expenses`),
+        getCategories(userId),
+        getSubCategories(userId),
+        getPlaces(userId),
+        getExpenses(userId),
       ]);
-      setCategories(catRes.data);
-      setSubCategories(subRes.data);
-      setPlaces(placeRes.data);
-      setExpenses(expRes.data);
+      setCategories(catRes);
+      setSubCategories(subRes);
+      setPlaces(placeRes);
+      setExpenses(expRes);
     } catch (err) {
       console.error("Error fetching data", err);
     }
   };
 
-  // ------- Handlers with API calls -------
-
   const handleAddCategory = async (e) => {
     e.preventDefault();
-    if (!categoryName) return;
+    if (!categoryName || !userId) return;
+
+    const payload = {
+      name: categoryName,
+      userId,
+      isActive: true,
+      createdDate: new Date().toISOString(),
+      subCategories: [],
+      places: [],
+    };
+
     try {
-      const res = await axios.post(`${API_BASE}/categories`, {
-        name: categoryName,
-      });
-      setCategories([...categories, res.data]);
+      const res = await createCategory(payload);
+      setCategories([...categories, res]);
       setCategoryName("");
-    } catch (err) {
-      console.error("Error adding category", err);
+    } catch (error) {
+      console.error(
+        "Failed to create category:",
+        error.response?.data || error.message
+      );
+      alert(
+        "Failed to create category: " + (error.response?.data || error.message)
+      );
     }
   };
 
   const handleAddSubCategory = async (e) => {
     e.preventDefault();
-    if (!subCategoryName || !selectedCategory) return;
+    if (!subCategoryName || !selectedCategory || !userId) return;
+
+    const payload = {
+      name: subCategoryName,
+      categoryId: selectedCategory,
+      userId,
+    };
+
     try {
-      const res = await axios.post(`${API_BASE}/subcategories`, {
-        name: subCategoryName,
-        categoryId: selectedCategory,
-      });
-      setSubCategories([...subCategories, res.data]);
+      const res = await createSubCategory(payload);
+      setSubCategories([...subCategories, res]);
       setSubCategoryName("");
       setSelectedCategory("");
-    } catch (err) {
-      console.error("Error adding subcategory", err);
+    } catch (error) {
+      console.error(
+        "Failed to create subcategory:",
+        error.response?.data || error.message
+      );
+      alert(
+        "Failed to create subcategory: " +
+          (error.response?.data || error.message)
+      );
     }
   };
 
   const handleAddPlace = async (e) => {
     e.preventDefault();
-    if (!placeName || !selectedCategoryForPlace) return;
+    if (!placeName || !selectedCategoryForPlace || !userId) return;
+
+    const payload = {
+      name: placeName,
+      categoryId: selectedCategoryForPlace,
+      subCategoryId: selectedSubCategoryForPlace || null,
+      userId,
+    };
+
     try {
-      const res = await axios.post(`${API_BASE}/places`, {
-        name: placeName,
-        categoryId: selectedCategoryForPlace,
-        subCategoryId: selectedSubCategoryForPlace || null,
-      });
-      setPlaces([...places, res.data]);
+      const res = await createPlace(payload);
+      setPlaces([...places, res]);
       setPlaceName("");
       setSelectedCategoryForPlace("");
       setSelectedSubCategoryForPlace("");
-    } catch (err) {
-      console.error("Error adding place", err);
+    } catch (error) {
+      console.error(
+        "Failed to create place:",
+        error.response?.data || error.message
+      );
+      alert(
+        "Failed to create place: " + (error.response?.data || error.message)
+      );
     }
   };
 
@@ -2487,12 +2552,15 @@ export default function ExpenseManager() {
     if (
       !expenseForm.category ||
       !expenseForm.subCategory ||
-      !expenseForm.amount
+      !expenseForm.amount ||
+      !userId
     )
       return;
+
+    const payload = { ...expenseForm, userId };
     try {
-      const res = await axios.post(`${API_BASE}/expenses`, expenseForm);
-      setExpenses([...expenses, res.data]);
+      const res = await createExpense(payload);
+      setExpenses([...expenses, res]);
       setExpenseForm({
         category: "",
         subCategory: "",
@@ -2503,8 +2571,14 @@ export default function ExpenseManager() {
         note: "",
         isFixed: false,
       });
-    } catch (err) {
-      console.error("Error adding expense", err);
+    } catch (error) {
+      console.error(
+        "Failed to create expense:",
+        error.response?.data || error.message
+      );
+      alert(
+        "Failed to create expense: " + (error.response?.data || error.message)
+      );
     }
   };
 
@@ -2518,13 +2592,17 @@ export default function ExpenseManager() {
 
   const handleDelete = async (id, type) => {
     try {
-      await axios.delete(`${API_BASE}/${type}s/${id}`); // assumes plural API routes
+      if (type === "category") await deleteCategory(id);
+      if (type === "subCategory") await deleteSubCategory(id);
+      if (type === "place") await deletePlace(id);
+      if (type === "expense") await deleteExpense(id);
+
       if (type === "category")
         setCategories(categories.filter((c) => c.id !== id));
       if (type === "subCategory")
         setSubCategories(subCategories.filter((c) => c.id !== id));
-      if (type === "place") setPlaces(places.filter((c) => c.id !== id));
-      if (type === "expense") setExpenses(expenses.filter((c) => c.id !== id));
+      if (type === "place") setPlaces(places.filter((p) => p.id !== id));
+      if (type === "expense") setExpenses(expenses.filter((e) => e.id !== id));
     } catch (err) {
       console.error(`Error deleting ${type}`, err);
     }
